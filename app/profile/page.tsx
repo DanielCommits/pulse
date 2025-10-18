@@ -2,7 +2,8 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { Settings, MapPin, Calendar, LinkIcon, Users, Zap } from "lucide-react"
+import { Settings, MapPin, Calendar, LinkIcon, Users, Zap, ArrowLeft } from "lucide-react"
+import Link from "next/link"
 import { useAppStore } from "@/lib/store"
 import PostCard from "@/components/post-card"
 import { mockPosts, mockStories } from "@/lib/mock-data"
@@ -19,7 +20,21 @@ export default function ProfilePage() {
       {/* Header */}
       <div className="sticky top-0 z-40 bg-[#0d1117]/80 backdrop-blur-md border-b border-[#30363d]">
         <div className="flex items-center justify-between p-4">
-          <h1 className="text-xl font-bold text-[#ffffff]">Profile</h1>
+          {/* Back Button + Title */}
+          <div className="flex items-center gap-3">
+            <Link href="/" passHref>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="p-2 text-[#8b949e] hover:text-[#00ffff] hover:bg-[#1c2128] rounded-lg transition-smooth"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </motion.button>
+            </Link>
+            <h1 className="text-xl font-bold text-[#ffffff]">Profile</h1>
+          </div>
+
+          {/* Settings Button */}
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -112,7 +127,7 @@ export default function ProfilePage() {
               </div>
               <div className="flex items-center gap-1">
                 <Calendar className="w-4 h-4" />
-                <span>Joined March 2024</span>
+                <span>Joined September 2025</span>
               </div>
             </div>
 

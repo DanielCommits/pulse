@@ -2,7 +2,8 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { Heart, MessageCircle, UserPlus, AtSign, Settings } from "lucide-react"
+import { Heart, MessageCircle, UserPlus, AtSign, Settings, ArrowLeft } from "lucide-react"
+import Link from "next/link"
 import { mockNotifications } from "@/lib/mock-data"
 
 const notificationIcons = {
@@ -38,7 +39,19 @@ export default function NotificationsPage() {
       {/* Header */}
       <div className="sticky top-0 z-40 bg-[#0d1117]/80 backdrop-blur-md border-b border-[#30363d]">
         <div className="flex items-center justify-between p-4">
-          <h1 className="text-xl font-bold text-[#ffffff]">Notifications</h1>
+          <div className="flex items-center gap-3">
+            <Link href="/home">
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                className="p-2 text-[#8b949e] hover:text-[#00ffff] hover:bg-[#1c2128] rounded-lg transition-smooth"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </motion.button>
+            </Link>
+            <h1 className="text-xl font-bold text-[#ffffff]">Notifications</h1>
+          </div>
+
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}

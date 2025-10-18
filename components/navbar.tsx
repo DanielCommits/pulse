@@ -3,10 +3,12 @@
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, MessageCircle, Bell, User } from "lucide-react"
+import { Home, MessageCircle, Bell, User, Search } from "lucide-react"
+import { useState } from "react"
 
 const navItems = [
   { icon: Home, label: "Home", href: "/home" },
+  { icon: Search, label: "Search", href: "/search" },
   { icon: MessageCircle, label: "Messages", href: "/messages" },
   { icon: Bell, label: "Notifications", href: "/notifications" },
   { icon: User, label: "Profile", href: "/profile" },
@@ -14,12 +16,12 @@ const navItems = [
 
 export default function Navbar() {
   const pathname = usePathname()
+  const [activeLabel, setActiveLabel] = useState<string | null>(null)
 
   return (
     <>
-      {/* Desktop Sidebar */}
+      {/* Desktop Sidebar stays same */}
       <nav className="hidden md:flex fixed left-0 top-0 h-screen w-64 bg-[#161b22] border-r border-[#30363d] flex-col p-4 z-50">
-        {/* Logo */}
         <Link href="/home" className="flex items-center gap-3 mb-8 px-3">
           <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-[#00ffff] to-[#0ea5e9] glow-primary-sm">
             <svg className="w-5 h-5 text-[#0d1117]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -29,7 +31,6 @@ export default function Navbar() {
           <span className="text-xl font-bold text-[#ffffff]">Pulse</span>
         </Link>
 
-        {/* Navigation Items */}
         <div className="flex-1 space-y-2">
           {navItems.map((item) => {
             const Icon = item.icon
@@ -53,7 +54,6 @@ export default function Navbar() {
           })}
         </div>
 
-        {/* New Post Button */}
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
@@ -63,24 +63,43 @@ export default function Navbar() {
         </motion.button>
       </nav>
 
-      {/* Mobile Bottom Navigation */}
+      {/* 📱 Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#161b22] border-t border-[#30363d] z-50">
         <div className="flex items-center justify-around px-2 py-3">
           {navItems.map((item) => {
             const Icon = item.icon
             const isActive = pathname === item.href
+            const isLabelVisible = activeLabel === item.label
+
             return (
-              <Link key={item.href} href={item.href}>
-                <motion.div
-                  whileTap={{ scale: 0.9 }}
-                  className={`flex flex-col items-center gap-1 px-4 py-2 rounded-lg transition-smooth ${
-                    isActive ? "text-[#00ffff]" : "text-[#8b949e]"
-                  }`}
+              <div key={item.href} className="relative flex flex-col items-center">
+                <Link
+                  href={item.href}
+                  onClick={() => setActiveLabel(isLabelVisible ? null : item.label)}
                 >
-                  <Icon className="w-6 h-6" />
-                  <span className="text-xs font-medium">{item.label}</span>
-                </motion.div>
-              </Link>
+                  <motion.div
+                    whileTap={{ scale: 0.9 }}
+                    className={`p-2 rounded-lg transition-smooth ${
+                      isActive ? "text-[#00ffff]" : "text-[#8b949e]"
+                    }`}
+                  >
+                    <Icon className="w-6 h-6" />
+                  </motion.div>
+                </Link>
+
+                {/* Animated label that fades in/out */}
+                <motion.span
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{
+                    opacity: isLabelVisible ? 1 : 0,
+                    y: isLabelVisible ? 0 : 5,
+                  }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute -top-6 text-xs font-medium text-[#00ffff] bg-[#0d1117] px-2 py-1 rounded-md shadow-md"
+                >
+                  {item.label}
+                </motion.span>
+              </div>
             )
           })}
         </div>
