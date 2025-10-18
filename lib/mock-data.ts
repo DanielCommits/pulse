@@ -27,8 +27,8 @@ export const mockPosts: Post[] = [
   {
     id: "1",
     userId: "2",
-    username: "sarahwilson",
-    displayName: "Sarah Wilson",
+    username: "sarahdahdev",
+    displayName: "Sarah Ogunmekpon",
     avatar: "/diverse-woman-avatar.png",
     content: "Just launched my new portfolio! Check it out and let me know what you think 🚀✨",
     timestamp: "2h ago",
