@@ -90,8 +90,8 @@ export const useAppStore = create<AppState>((set) => ({
     // Mock user data
     const mockUser: User = {
       id: "1",
-      username: "alexchen",
-      displayName: "Alex Chen",
+      username: "d4knrick",
+      displayName: "Omoare Daniel",
       avatar: "/diverse-profile-avatars.png",
       bio: "Designer & Developer | Building the future",
       homies: 1234,
