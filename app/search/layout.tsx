@@ -1,7 +1,7 @@
 import type React from "react"
 import Navbar from "@/components/navbar"
 
-export default function HomeLayout({
+export default function SearchLayout({
   children,
 }: {
   children: React.ReactNode
@@ -13,4 +13,3 @@ export default function HomeLayout({
     </div>
   )
 }
-

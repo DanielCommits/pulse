@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { motion } from "framer-motion"
-import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal } from "lucide-react"
+import { Heart, MessageCircle, Repeat2, Bookmark, MoreHorizontal } from "lucide-react"
 import type { Post } from "@/lib/store"
 import { useState } from "react"
 import Link from "next/link"
@@ -15,12 +15,21 @@ interface PostCardProps {
 export default function PostCard({ post }: PostCardProps) {
   const [liked, setLiked] = useState(post.liked)
   const [likes, setLikes] = useState(post.likes)
+  const [reposted, setReposted] = useState(false)
+  const [reposts, setReposts] = useState(post.shares)
 
   const handleLike = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
     setLiked(!liked)
     setLikes(liked ? likes - 1 : likes + 1)
+  }
+
+  const handleRepost = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setReposted(!reposted)
+    setReposts(reposted ? reposts - 1 : reposts + 1)
   }
 
   return (
@@ -66,6 +75,22 @@ export default function PostCard({ post }: PostCardProps) {
         {/* Content */}
         <p className="text-[#ffffff] mb-4 leading-relaxed">{post.content}</p>
 
+        {post.media && (
+          <div className="mb-4 rounded-lg overflow-hidden bg-[#0d1117] border border-[#30363d]">
+            {post.media.type === "image" ? (
+              <img
+                src={post.media.url || "/placeholder.svg"}
+                alt="Post media"
+                className="w-full h-auto max-h-96 object-cover"
+              />
+            ) : (
+              <video src={post.media.url} className="w-full h-auto max-h-96 object-cover" controls />
+            )}
+          </div>
+        )}
+
+        {post.caption && <p className="text-[#8b949e] text-sm mb-4 italic">{post.caption}</p>}
+
         {/* Actions */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-6">
@@ -92,17 +117,15 @@ export default function PostCard({ post }: PostCardProps) {
               <span className="text-sm">{post.comments}</span>
             </motion.button>
 
-            {/* Share */}
             <motion.button
               whileTap={{ scale: 0.9 }}
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-              }}
-              className="flex items-center gap-2 text-[#8b949e] hover:text-[#00ffff] transition-smooth"
+              onClick={handleRepost}
+              className={`flex items-center gap-2 transition-smooth ${
+                reposted ? "text-[#00ffff]" : "text-[#8b949e] hover:text-[#00ffff]"
+              }`}
             >
-              <Share2 className="w-5 h-5" />
-              <span className="text-sm">{post.shares}</span>
+              <Repeat2 className={`w-5 h-5 ${reposted ? "fill-[#00ffff]" : ""}`} />
+              <span className="text-sm">{reposts}</span>
             </motion.button>
           </div>
 

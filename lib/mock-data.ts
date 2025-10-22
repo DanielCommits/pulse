@@ -13,6 +13,7 @@ export interface Comment {
   likes: number
   liked: boolean
   verified: boolean
+   parentId?: string
 }
 
 export interface ChatMessage {
@@ -27,8 +28,8 @@ export const mockPosts: Post[] = [
   {
     id: "1",
     userId: "2",
-    username: "sarahdahdev",
-    displayName: "Sarah Ogunmekpon",
+    username: "sarahwilson",
+    displayName: "Sarah Wilson",
     avatar: "/diverse-woman-avatar.png",
     content: "Just launched my new portfolio! Check it out and let me know what you think 🚀✨",
     timestamp: "2h ago",
@@ -265,7 +266,7 @@ export const mockTrendingUsers = [
     displayName: "Jessica Park",
     avatar: "/diverse-designer-avatars.png",
     bio: "UI/UX Designer | Creative Director",
-    followers: 45600,
+    following: 45600,
     verified: true,
   },
   {
@@ -274,7 +275,7 @@ export const mockTrendingUsers = [
     displayName: "Ryan Miller",
     avatar: "/tech-avatar.png",
     bio: "Tech Entrepreneur | Investor",
-    followers: 89200,
+    following: 89200,
     verified: true,
   },
   {
@@ -283,7 +284,7 @@ export const mockTrendingUsers = [
     displayName: "Olivia Brown",
     avatar: "/content-creator-workspace.png",
     bio: "Content Creator | Photographer",
-    followers: 34500,
+    following: 34500,
     verified: false,
   },
 ]

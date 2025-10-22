@@ -3,7 +3,7 @@
 import type React from "react"
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { ArrowLeft, Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Send } from "lucide-react"
+import { ArrowLeft, Heart, MessageCircle, Repeat2, Bookmark, MoreHorizontal, Send } from "lucide-react"
 import Link from "next/link"
 import { mockPosts, mockComments } from "@/lib/mock-data"
 import { useAppStore } from "@/lib/store"
@@ -16,8 +16,12 @@ export default function PostThreadPage({ params }: { params: { id: string } }) {
 
   const [liked, setLiked] = useState(post?.liked || false)
   const [likes, setLikes] = useState(post?.likes || 0)
+  const [reposted, setReposted] = useState(false)
+  const [reposts, setReposts] = useState(post?.shares || 0)
   const [comment, setComment] = useState("")
   const [comments, setComments] = useState(postComments)
+  const [replyingTo, setReplyingTo] = useState<string | null>(null)
+  const [replyText, setReplyText] = useState("")
 
   if (!post) {
     return (
@@ -30,6 +34,11 @@ export default function PostThreadPage({ params }: { params: { id: string } }) {
   const handleLike = () => {
     setLiked(!liked)
     setLikes(liked ? likes - 1 : likes + 1)
+  }
+
+  const handleRepost = () => {
+    setReposted(!reposted)
+    setReposts(reposted ? reposts - 1 : reposts + 1)
   }
 
   const handleCommentSubmit = (e: React.FormEvent) => {
@@ -52,6 +61,36 @@ export default function PostThreadPage({ params }: { params: { id: string } }) {
 
     setComments([...comments, newComment])
     setComment("")
+  }
+
+  const handleReplySubmit = (e: React.FormEvent, commentId: string) => {
+    e.preventDefault()
+    if (!replyText.trim() || !currentUser) return
+
+    const newReply = {
+      id: `r${Date.now()}`,
+      postId: id,
+      userId: currentUser.id,
+      username: currentUser.username,
+      displayName: currentUser.displayName,
+      avatar: currentUser.avatar,
+      content: replyText,
+      timestamp: "Just now",
+      likes: 0,
+      liked: false,
+      verified: currentUser.verified,
+      parentId: commentId,
+    }
+
+    setComments([...comments, newReply])
+    setReplyText("")
+    setReplyingTo(null)
+  }
+
+  const topLevelComments = comments.filter((c) => !c.parentId)
+
+  const getReplies = (commentId: string) => {
+    return comments.filter((c) => c.parentId === commentId)
   }
 
   return (
@@ -114,12 +153,12 @@ export default function PostThreadPage({ params }: { params: { id: string } }) {
             <span className="text-[#8b949e] ml-1">Likes</span>
           </div>
           <div>
-            <span className="font-semibold text-[#ffffff]">{comments.length}</span>
+            <span className="font-semibold text-[#ffffff]">{topLevelComments.length}</span>
             <span className="text-[#8b949e] ml-1">Comments</span>
           </div>
           <div>
-            <span className="font-semibold text-[#ffffff]">{post.shares}</span>
-            <span className="text-[#8b949e] ml-1">Shares</span>
+            <span className="font-semibold text-[#ffffff]">{reposts}</span>
+            <span className="text-[#8b949e] ml-1">Reposts</span>
           </div>
         </div>
 
@@ -142,9 +181,10 @@ export default function PostThreadPage({ params }: { params: { id: string } }) {
 
           <motion.button
             whileTap={{ scale: 0.9 }}
-            className="flex items-center gap-2 text-[#8b949e] hover:text-[#00ffff] transition-smooth"
+            onClick={handleRepost}
+            className={`flex items-center gap-2 transition-smooth ${reposted ? "text-[#00ffff]" : "text-[#8b949e] hover:text-[#00ffff]"}`}
           >
-            <Share2 className="w-6 h-6" />
+            <Repeat2 className={`w-6 h-6 ${reposted ? "fill-[#00ffff]" : ""}`} />
           </motion.button>
 
           <motion.button whileTap={{ scale: 0.9 }} className="text-[#8b949e] hover:text-[#00ffff] transition-smooth">
@@ -184,51 +224,136 @@ export default function PostThreadPage({ params }: { params: { id: string } }) {
 
       {/* Comments */}
       <div className="divide-y divide-[#30363d]">
-        {comments.map((c, index) => (
-          <motion.div
-            key={c.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.05 }}
-            className="bg-[#161b22] p-4 hover:bg-[#1c2128] transition-smooth"
-          >
-            <div className="flex items-start gap-3">
-              <img
-                src={c.avatar || "/placeholder.svg"}
-                alt={c.displayName}
-                className="w-10 h-10 rounded-full border-2 border-[#30363d] object-cover"
-              />
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <h4 className="font-semibold text-[#ffffff]">{c.displayName}</h4>
-                  {c.verified && (
-                    <svg className="w-4 h-4 text-[#00ffff]" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  )}
-                  <span className="text-sm text-[#8b949e]">@{c.username}</span>
-                  <span className="text-sm text-[#6e7681]">· {c.timestamp}</span>
-                </div>
-                <p className="text-[#ffffff] mb-2">{c.content}</p>
-                <div className="flex items-center gap-4">
-                  <motion.button
-                    whileTap={{ scale: 0.9 }}
-                    className="flex items-center gap-1 text-[#8b949e] hover:text-[#00ffff] transition-smooth text-sm"
-                  >
-                    <Heart className={`w-4 h-4 ${c.liked ? "fill-[#00ffff] text-[#00ffff]" : ""}`} />
-                    <span>{c.likes}</span>
-                  </motion.button>
-                  <motion.button
-                    whileTap={{ scale: 0.9 }}
-                    className="text-[#8b949e] hover:text-[#00ffff] transition-smooth text-sm"
-                  >
-                    Reply
-                  </motion.button>
+        {topLevelComments.map((c, index) => {
+          const replies = getReplies(c.id)
+          return (
+            <motion.div
+              key={c.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05 }}
+              className="bg-[#161b22]"
+            >
+              {/* Main Comment */}
+              <div className="p-4 hover:bg-[#1c2128] transition-smooth">
+                <div className="flex items-start gap-3">
+                  <img
+                    src={c.avatar || "/placeholder.svg"}
+                    alt={c.displayName}
+                    className="w-10 h-10 rounded-full border-2 border-[#30363d] object-cover"
+                  />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-semibold text-[#ffffff]">{c.displayName}</h4>
+                      {c.verified && (
+                        <svg className="w-4 h-4 text-[#00ffff]" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      )}
+                      <span className="text-sm text-[#8b949e]">@{c.username}</span>
+                      <span className="text-sm text-[#6e7681]">· {c.timestamp}</span>
+                    </div>
+                    <p className="text-[#ffffff] mb-2">{c.content}</p>
+                    <div className="flex items-center gap-4">
+                      <motion.button
+                        whileTap={{ scale: 0.9 }}
+                        className="flex items-center gap-1 text-[#8b949e] hover:text-[#00ffff] transition-smooth text-sm"
+                      >
+                        <Heart className={`w-4 h-4 ${c.liked ? "fill-[#00ffff] text-[#00ffff]" : ""}`} />
+                        <span>{c.likes}</span>
+                      </motion.button>
+                      <motion.button
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => setReplyingTo(replyingTo === c.id ? null : c.id)}
+                        className="text-[#8b949e] hover:text-[#00ffff] transition-smooth text-sm"
+                      >
+                        {replyingTo === c.id ? "Cancel" : "Reply"}
+                      </motion.button>
+                    </div>
+
+                    {replyingTo === c.id && (
+                      <motion.form
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        onSubmit={(e) => handleReplySubmit(e, c.id)}
+                        className="mt-3 flex items-start gap-2"
+                      >
+                        <img
+                          src={currentUser?.avatar || "/placeholder.svg"}
+                          alt={currentUser?.displayName || "User"}
+                          className="w-8 h-8 rounded-full border-2 border-[#30363d] object-cover"
+                        />
+                        <div className="flex-1 flex gap-2">
+                          <input
+                            type="text"
+                            value={replyText}
+                            onChange={(e) => setReplyText(e.target.value)}
+                            placeholder={`Reply to @${c.username}...`}
+                            className="flex-1 px-3 py-2 bg-[#0d1117] border border-[#30363d] rounded-lg text-[#ffffff] placeholder-[#6e7681] focus:outline-none focus:border-[#00ffff] focus:ring-1 focus:ring-[#00ffff] transition-smooth text-sm"
+                            autoFocus
+                          />
+                          <motion.button
+                            type="submit"
+                            disabled={!replyText.trim()}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="p-2 bg-gradient-to-r from-[#00ffff] to-[#0ea5e9] text-[#0d1117] rounded-lg hover:opacity-90 transition-smooth disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <Send className="w-4 h-4" />
+                          </motion.button>
+                        </div>
+                      </motion.form>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          </motion.div>
-        ))}
+
+              {replies.length > 0 && (
+                <div className="ml-12 border-l-2 border-[#30363d]">
+                  {replies.map((reply, replyIndex) => (
+                    <motion.div
+                      key={reply.id}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: replyIndex * 0.05 }}
+                      className="p-4 hover:bg-[#1c2128] transition-smooth border-b border-[#30363d] last:border-b-0"
+                    >
+                      <div className="flex items-start gap-3">
+                        <img
+                          src={reply.avatar || "/placeholder.svg"}
+                          alt={reply.displayName}
+                          className="w-8 h-8 rounded-full border-2 border-[#30363d] object-cover"
+                        />
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-semibold text-[#ffffff] text-sm">{reply.displayName}</h4>
+                            {reply.verified && (
+                              <svg className="w-3 h-3 text-[#00ffff]" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            )}
+                            <span className="text-xs text-[#8b949e]">@{reply.username}</span>
+                            <span className="text-xs text-[#6e7681]">· {reply.timestamp}</span>
+                          </div>
+                          <p className="text-[#ffffff] text-sm mb-2">{reply.content}</p>
+                          <div className="flex items-center gap-4">
+                            <motion.button
+                              whileTap={{ scale: 0.9 }}
+                              className="flex items-center gap-1 text-[#8b949e] hover:text-[#00ffff] transition-smooth text-xs"
+                            >
+                              <Heart className={`w-3 h-3 ${reply.liked ? "fill-[#00ffff] text-[#00ffff]" : ""}`} />
+                              <span>{reply.likes}</span>
+                            </motion.button>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          )
+        })}
       </div>
     </div>
   )

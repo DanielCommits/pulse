@@ -14,8 +14,7 @@ export default function HomePage() {
         <div className="flex items-center justify-between p-4">
           <h1 className="text-xl font-bold text-[#ffffff]">Home</h1>
           <div className="flex items-center gap-2">
-            {/*<button className="px-4 py-2 text-[#00ffff] border-b-2 border-[#00ffff] font-medium">For You</button>*/}
-            <button className="px-4 py-2 text-[#8b949e] hover:text-[#ffffff] transition-smooth">Following</button>
+            <button className="px-4 py-2 text-[#00ffff] border-b-2 border-[#00ffff] font-medium">Following</button>
           </div>
         </div>
       </div>

@@ -1,28 +1,52 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { Settings, MapPin, Calendar, LinkIcon, Users, Zap, ArrowLeft } from "lucide-react"
+import { Settings, MapPin, Calendar, LinkIcon, Users, Zap, ArrowLeft, Camera } from "lucide-react"
 import Link from "next/link"
 import { useAppStore } from "@/lib/store"
 import PostCard from "@/components/post-card"
+import EditProfileModal from "@/components/edit-profile-modal"
 import { mockPosts, mockStories } from "@/lib/mock-data"
 
 export default function ProfilePage() {
   const currentUser = useAppStore((state) => state.currentUser)
+  const updateUserAvatar = useAppStore((state) => state.updateUserAvatar)
   const [activeTab, setActiveTab] = useState<"posts" | "stories">("posts")
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
 
   // Filter posts by current user
   const userPosts = mockPosts.filter((post) => post.userId === currentUser?.id)
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setIsUploadingAvatar(true)
+
+    // Simulate file upload delay
+    await new Promise((resolve) => setTimeout(resolve, 500))
+
+    // Create a data URL for the image
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const imageUrl = event.target?.result as string
+      updateUserAvatar(imageUrl)
+      setIsUploadingAvatar(false)
+    }
+    reader.readAsDataURL(file)
+  }
 
   return (
     <div className="min-h-screen pb-20 md:pb-0">
       {/* Header */}
       <div className="sticky top-0 z-40 bg-[#0d1117]/80 backdrop-blur-md border-b border-[#30363d]">
         <div className="flex items-center justify-between p-4">
-          {/* Back Button + Title */}
-          <div className="flex items-center gap-3">
-            <Link href="/" passHref>
+          <div className="flex items-center gap-4">
+            <Link href="/home">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -33,15 +57,15 @@ export default function ProfilePage() {
             </Link>
             <h1 className="text-xl font-bold text-[#ffffff]">Profile</h1>
           </div>
-
-          {/* Settings Button */}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="p-2 text-[#8b949e] hover:text-[#00ffff] hover:bg-[#1c2128] rounded-lg transition-smooth"
-          >
-            <Settings className="w-5 h-5" />
-          </motion.button>
+          <Link href="/settings">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="p-2 text-[#8b949e] hover:text-[#00ffff] hover:bg-[#1c2128] rounded-lg transition-smooth"
+            >
+              <Settings className="w-5 h-5" />
+            </motion.button>
+          </Link>
         </div>
       </div>
 
@@ -60,18 +84,35 @@ export default function ProfilePage() {
 
           {/* Profile Info */}
           <div className="px-6 pb-6 -mt-16 relative">
-            {/* Avatar */}
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className="relative inline-block mb-4"
+              className="relative inline-block mb-4 group"
             >
               <img
                 src={currentUser?.avatar || "/placeholder.svg"}
                 alt={currentUser?.displayName}
                 className="w-28 h-28 rounded-2xl border-4 border-[#161b22] object-cover glow-primary"
               />
+
+              <label className="absolute inset-0 flex items-center justify-center bg-[#0d1117]/70 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarChange}
+                  disabled={isUploadingAvatar}
+                  className="hidden"
+                />
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-[#00ffff] to-[#0ea5e9] rounded-full"
+                >
+                  <Camera className="w-6 h-6 text-[#0d1117]" />
+                </motion.div>
+              </label>
+
               {currentUser?.verified && (
                 <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-gradient-to-br from-[#00ffff] to-[#0ea5e9] rounded-full flex items-center justify-center border-4 border-[#161b22]">
                   <Zap className="w-5 h-5 text-[#0d1117]" fill="currentColor" />
@@ -89,27 +130,16 @@ export default function ProfilePage() {
             <p className="text-[#ffffff] mb-4 leading-relaxed">{currentUser?.bio}</p>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="grid grid-cols-1 gap-3 mb-4">
               <motion.div
                 whileHover={{ scale: 1.02 }}
                 className="bg-[#0d1117] border border-[#30363d] rounded-xl p-4 hover:border-[#00ffff]/30 transition-smooth cursor-pointer"
               >
                 <div className="flex items-center gap-2 mb-1">
                   <Users className="w-4 h-4 text-[#00ffff]" />
-                  <span className="text-sm text-[#8b949e]">Followers</span>
+                  <span className="text-sm text-[#8b949e]">Homies</span>
                 </div>
-                <p className="text-2xl font-bold text-[#ffffff]">{currentUser?.followers.toLocaleString()}</p>
-              </motion.div>
-
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                className="bg-[#0d1117] border border-[#30363d] rounded-xl p-4 hover:border-[#00ffff]/30 transition-smooth cursor-pointer"
-              >
-                <div className="flex items-center gap-2 mb-1">
-                  <Users className="w-4 h-4 text-[#0ea5e9]" />
-                  <span className="text-sm text-[#8b949e]">Following</span>
-                </div>
-                <p className="text-2xl font-bold text-[#ffffff]">{currentUser?.following.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-[#ffffff]">{currentUser?.homies.toLocaleString()}</p>
               </motion.div>
             </div>
 
@@ -127,7 +157,7 @@ export default function ProfilePage() {
               </div>
               <div className="flex items-center gap-1">
                 <Calendar className="w-4 h-4" />
-                <span>Joined September 2025</span>
+                <span>Joined March 2024</span>
               </div>
             </div>
 
@@ -136,6 +166,7 @@ export default function ProfilePage() {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
+                onClick={() => setIsEditModalOpen(true)}
                 className="flex-1 py-3 bg-gradient-to-r from-[#00ffff] to-[#0ea5e9] text-[#0d1117] font-semibold rounded-xl hover:opacity-90 transition-smooth glow-primary-sm"
               >
                 Edit Profile
@@ -244,6 +275,8 @@ export default function ProfilePage() {
           </div>
         )}
       </div>
+
+      <EditProfileModal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} />
     </div>
   )
 }
