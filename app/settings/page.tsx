@@ -52,7 +52,7 @@ export default function SettingsPage() {
   ]
 
   return (
-    <div className="min-h-screen pb-20 md:pb-0 md:ml-64 bg-[#0d1117]">
+    <div className="min-h-screen pb-20 md:pb-0 bg-[#0d1117]">
       {/* Header */}
       <div className="sticky top-0 z-40 bg-[#0d1117]/80 backdrop-blur-md border-b border-[#30363d]">
         <div className="flex items-center gap-4 p-4">
