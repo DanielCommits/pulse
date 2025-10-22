@@ -8,8 +8,7 @@ export interface User {
   displayName: string
   avatar: string
   bio: string
-  followers: number
-  following: number
+  homies: number
   verified: boolean
 }
 
@@ -20,6 +19,11 @@ export interface Post {
   displayName: string
   avatar: string
   content: string
+  media?: {
+    type: "image" | "video"
+    url: string
+  }
+  caption?: string
   timestamp: string
   likes: number
   comments: number
@@ -63,15 +67,20 @@ export interface Notification {
 interface AppState {
   currentUser: User | null
   isAuthenticated: boolean
+  userStories: Story[]
   setCurrentUser: (user: User | null) => void
   setAuthenticated: (value: boolean) => void
   login: (email: string, password: string) => Promise<void>
   logout: () => void
+  updateUserAvatar: (avatarUrl: string) => void
+  addStory: (story: Story) => void
+  updateUserProfile: (displayName: string, bio: string) => void
 }
 
 export const useAppStore = create<AppState>((set) => ({
   currentUser: null,
   isAuthenticated: false,
+  userStories: [],
   setCurrentUser: (user) => set({ currentUser: user }),
   setAuthenticated: (value) => set({ isAuthenticated: value }),
   login: async (email: string, password: string) => {
@@ -81,12 +90,11 @@ export const useAppStore = create<AppState>((set) => ({
     // Mock user data
     const mockUser: User = {
       id: "1",
-      username: "d4knrick",
-      displayName: "Omoare Daniel",
+      username: "alexchen",
+      displayName: "Alex Chen",
       avatar: "/diverse-profile-avatars.png",
       bio: "Designer & Developer | Building the future",
-      followers: 1234,
-      following: 567,
+      homies: 1234,
       verified: true,
     }
 
@@ -94,5 +102,20 @@ export const useAppStore = create<AppState>((set) => ({
   },
   logout: () => {
     set({ currentUser: null, isAuthenticated: false })
+  },
+  updateUserAvatar: (avatarUrl: string) => {
+    set((state) => ({
+      currentUser: state.currentUser ? { ...state.currentUser, avatar: avatarUrl } : null,
+    }))
+  },
+  addStory: (story: Story) => {
+    set((state) => ({
+      userStories: [...state.userStories, story],
+    }))
+  },
+  updateUserProfile: (displayName: string, bio: string) => {
+    set((state) => ({
+      currentUser: state.currentUser ? { ...state.currentUser, displayName, bio } : null,
+    }))
   },
 }))

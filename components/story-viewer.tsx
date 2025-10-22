@@ -80,9 +80,9 @@ export default function StoryViewer({ stories, initialIndex, onClose }: StoryVie
       className="fixed inset-0 z-50 bg-[#0d1117] flex items-center justify-center"
     >
       {/* Progress bars */}
-      <div className="absolute top-0 left-0 right-0 z-10 flex gap-1 p-4">
+      <div className="absolute top-0 left-0 right-0 z-10 flex gap-1 p-2 md:p-4">
         {stories.map((_, index) => (
-          <div key={index} className="flex-1 h-1 bg-[#30363d] rounded-full overflow-hidden">
+          <div key={index} className="flex-1 h-0.5 md:h-1 bg-[#30363d] rounded-full overflow-hidden">
             <motion.div
               className="h-full bg-[#00ffff]"
               initial={{ width: "0%" }}
@@ -96,34 +96,34 @@ export default function StoryViewer({ stories, initialIndex, onClose }: StoryVie
       </div>
 
       {/* Header */}
-      <div className="absolute top-6 left-0 right-0 z-10 flex items-center justify-between px-4">
-        <div className="flex items-center gap-3">
+      <div className="absolute top-6 left-0 right-0 z-10 flex items-center justify-between px-3 md:px-4">
+        <div className="flex items-center gap-2 md:gap-3">
           <img
             src={currentStory.avatar || "/placeholder.svg"}
             alt={currentStory.username}
-            className="w-10 h-10 rounded-full border-2 border-[#00ffff] object-cover"
+            className="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-[#00ffff] object-cover"
           />
-          <div>
-            <h3 className="font-semibold text-[#ffffff]">{currentStory.username}</h3>
-            <p className="text-sm text-[#8b949e]">5h ago</p>
+          <div className="min-w-0">
+            <h3 className="font-semibold text-[#ffffff] text-sm md:text-base truncate">{currentStory.username}</h3>
+            <p className="text-xs text-[#8b949e]">5h ago</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 md:gap-2">
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsPaused(!isPaused)}
-            className="p-2 text-[#ffffff] hover:bg-[#1c2128] rounded-lg transition-smooth"
+            className="p-1.5 md:p-2 text-[#ffffff] hover:bg-[#1c2128] rounded-lg transition-smooth"
           >
-            {isPaused ? <Play className="w-5 h-5" /> : <Pause className="w-5 h-5" />}
+            {isPaused ? <Play className="w-4 h-4 md:w-5 md:h-5" /> : <Pause className="w-4 h-4 md:w-5 md:h-5" />}
           </motion.button>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={onClose}
-            className="p-2 text-[#ffffff] hover:bg-[#1c2128] rounded-lg transition-smooth"
+            className="p-1.5 md:p-2 text-[#ffffff] hover:bg-[#1c2128] rounded-lg transition-smooth"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4 md:w-5 md:h-5" />
           </motion.button>
         </div>
       </div>
@@ -136,18 +136,18 @@ export default function StoryViewer({ stories, initialIndex, onClose }: StoryVie
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 1.05 }}
           transition={{ duration: 0.3 }}
-          className="relative w-full h-full max-w-md mx-auto flex items-center justify-center"
+          className="relative w-full h-full md:max-w-md md:max-h-screen flex items-center justify-center"
         >
           <img
             src={currentStory.avatar || "/placeholder.svg?height=800&width=450&query=story content"}
             alt="Story"
-            className="w-full h-full object-cover rounded-lg"
+            className="w-full h-full md:rounded-lg object-cover"
           />
         </motion.div>
       </AnimatePresence>
 
-      {/* Navigation */}
-      <div className="absolute inset-0 flex items-center justify-between px-4 pointer-events-none">
+      {/* Navigation - Desktop */}
+      <div className="hidden md:flex absolute inset-0 items-center justify-between px-4 pointer-events-none">
         {currentIndex > 0 && (
           <motion.button
             whileHover={{ scale: 1.1 }}
@@ -172,7 +172,7 @@ export default function StoryViewer({ stories, initialIndex, onClose }: StoryVie
       </div>
 
       {/* Tap zones for mobile */}
-      <div className="absolute inset-0 flex md:hidden">
+      <div className="md:hidden absolute inset-0 flex">
         <button onClick={goToPrevious} className="flex-1" aria-label="Previous story" />
         <button onClick={goToNext} className="flex-1" aria-label="Next story" />
       </div>
