@@ -25,7 +25,7 @@ export default function StoryViewer({
   const currentStory = stories[currentIndex];
   const currentUser = useAppStore((state) => state.currentUser);
   const removeStory = useAppStore((state) => state.removeStory); // Add this to your store
-  const markStoryViewed = useAppStore((state) => state.markStoryViewed) // Add this to your store
+  const markStoryViewed = useAppStore((state) => state.markStoryViewed); // Add this to your store
 
   useEffect(() => {
     if (isPaused) return;
@@ -95,9 +95,9 @@ export default function StoryViewer({
   useEffect(() => {
     // Mark current story as viewed when opened
     if (currentStory && !currentStory.viewed) {
-      markStoryViewed(currentStory.id)
+      markStoryViewed(currentStory.id);
     }
-  }, [currentStory])
+  }, [currentStory]);
 
   return (
     <motion.div
