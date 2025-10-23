@@ -25,6 +25,7 @@ export default function StoryViewer({
   const currentStory = stories[currentIndex];
   const currentUser = useAppStore((state) => state.currentUser);
   const removeStory = useAppStore((state) => state.removeStory); // Add this to your store
+  const markStoryViewed = useAppStore((state) => state.markStoryViewed) // Add this to your store
 
   useEffect(() => {
     if (isPaused) return;
@@ -90,6 +91,13 @@ export default function StoryViewer({
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [currentIndex, isPaused]);
+
+  useEffect(() => {
+    // Mark current story as viewed when opened
+    if (currentStory && !currentStory.viewed) {
+      markStoryViewed(currentStory.id)
+    }
+  }, [currentStory])
 
   return (
     <motion.div

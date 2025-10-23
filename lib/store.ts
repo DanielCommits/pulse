@@ -78,6 +78,7 @@ interface AppState {
   removeStory: (storyId: string) => void;
   updateUserProfile: (displayName: string, bio: string) => void;
   addPost: (post: Post) => void; // Add this
+  markStoryViewed: (storyId: string) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -132,5 +133,11 @@ export const useAppStore = create<AppState>((set) => ({
   addPost: (post: Post) =>
     set((state) => ({
       posts: [post, ...state.posts], // Add new post to the top
+    })),
+  markStoryViewed: (storyId: string) =>
+    set((state) => ({
+      userStories: state.userStories.map((s) =>
+        s.id === storyId ? { ...s, viewed: true } : s
+      ),
     })),
 }));
