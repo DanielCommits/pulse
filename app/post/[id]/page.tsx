@@ -1,49 +1,59 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { ArrowLeft, Heart, MessageCircle, Repeat2, Bookmark, MoreHorizontal, Send } from "lucide-react"
-import Link from "next/link"
-import { mockPosts, mockComments } from "@/lib/mock-data"
-import { useAppStore } from "@/lib/store"
+import type React from "react";
+import { useState } from "react";
+import { motion } from "framer-motion";
+import {
+  ArrowLeft,
+  Heart,
+  MessageCircle,
+  Repeat2,
+  Bookmark,
+  MoreHorizontal,
+  Send,
+} from "lucide-react";
+import Link from "next/link";
+import { mockPosts, mockComments } from "@/lib/mock-data";
+import { useAppStore } from "@/lib/store";
 
 export default function PostThreadPage({ params }: { params: { id: string } }) {
-  const { id } = params
-  const currentUser = useAppStore((state) => state.currentUser)
-  const post = mockPosts.find((p) => p.id === id)
-  const postComments = mockComments.filter((c) => c.postId === id)
+  const { id } = params;
+  const posts = useAppStore((state) => state.posts);
+  const currentUser = useAppStore((state) => state.currentUser); // <-- Add this line
+  // Search in both store and mockPosts
+  const post = [...posts, ...mockPosts].find((p) => p.id === id);
+  const postComments = mockComments.filter((c) => c.postId === id);
 
-  const [liked, setLiked] = useState(post?.liked || false)
-  const [likes, setLikes] = useState(post?.likes || 0)
-  const [reposted, setReposted] = useState(false)
-  const [reposts, setReposts] = useState(post?.shares || 0)
-  const [comment, setComment] = useState("")
-  const [comments, setComments] = useState(postComments)
-  const [replyingTo, setReplyingTo] = useState<string | null>(null)
-  const [replyText, setReplyText] = useState("")
+  const [liked, setLiked] = useState(post?.liked || false);
+  const [likes, setLikes] = useState(post?.likes || 0);
+  const [reposted, setReposted] = useState(false);
+  const [reposts, setReposts] = useState(post?.shares || 0);
+  const [comment, setComment] = useState("");
+  const [comments, setComments] = useState(postComments);
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyText, setReplyText] = useState("");
 
   if (!post) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-[#8b949e]">Post not found</p>
       </div>
-    )
+    );
   }
 
   const handleLike = () => {
-    setLiked(!liked)
-    setLikes(liked ? likes - 1 : likes + 1)
-  }
+    setLiked(!liked);
+    setLikes(liked ? likes - 1 : likes + 1);
+  };
 
   const handleRepost = () => {
-    setReposted(!reposted)
-    setReposts(reposted ? reposts - 1 : reposts + 1)
-  }
+    setReposted(!reposted);
+    setReposts(reposted ? reposts - 1 : reposts + 1);
+  };
 
   const handleCommentSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!comment.trim() || !currentUser) return
+    e.preventDefault();
+    if (!comment.trim() || !currentUser) return;
 
     const newComment = {
       id: `c${Date.now()}`,
@@ -57,15 +67,15 @@ export default function PostThreadPage({ params }: { params: { id: string } }) {
       likes: 0,
       liked: false,
       verified: currentUser.verified,
-    }
+    };
 
-    setComments([...comments, newComment])
-    setComment("")
-  }
+    setComments([...comments, newComment]);
+    setComment("");
+  };
 
   const handleReplySubmit = (e: React.FormEvent, commentId: string) => {
-    e.preventDefault()
-    if (!replyText.trim() || !currentUser) return
+    e.preventDefault();
+    if (!replyText.trim() || !currentUser) return;
 
     const newReply = {
       id: `r${Date.now()}`,
@@ -80,18 +90,18 @@ export default function PostThreadPage({ params }: { params: { id: string } }) {
       liked: false,
       verified: currentUser.verified,
       parentId: commentId,
-    }
+    };
 
-    setComments([...comments, newReply])
-    setReplyText("")
-    setReplyingTo(null)
-  }
+    setComments([...comments, newReply]);
+    setReplyText("");
+    setReplyingTo(null);
+  };
 
-  const topLevelComments = comments.filter((c) => !c.parentId)
+  const topLevelComments = comments.filter((c) => !c.parentId);
 
   const getReplies = (commentId: string) => {
-    return comments.filter((c) => c.parentId === commentId)
-  }
+    return comments.filter((c) => c.parentId === commentId);
+  };
 
   return (
     <div className="min-h-screen pb-20 md:pb-0">
@@ -127,9 +137,15 @@ export default function PostThreadPage({ params }: { params: { id: string } }) {
             />
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-[#ffffff]">{post.displayName}</h3>
+                <h3 className="font-semibold text-[#ffffff]">
+                  {post.displayName}
+                </h3>
                 {post.verified && (
-                  <svg className="w-5 h-5 text-[#00ffff]" fill="currentColor" viewBox="0 0 24 24">
+                  <svg
+                    className="w-5 h-5 text-[#00ffff]"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 )}
@@ -143,7 +159,9 @@ export default function PostThreadPage({ params }: { params: { id: string } }) {
         </div>
 
         {/* Content */}
-        <p className="text-[#ffffff] text-lg mb-4 leading-relaxed">{post.content}</p>
+        <p className="text-[#ffffff] text-lg mb-4 leading-relaxed">
+          {post.content}
+        </p>
         <p className="text-[#8b949e] text-sm mb-6">{post.timestamp}</p>
 
         {/* Stats */}
@@ -153,7 +171,9 @@ export default function PostThreadPage({ params }: { params: { id: string } }) {
             <span className="text-[#8b949e] ml-1">Likes</span>
           </div>
           <div>
-            <span className="font-semibold text-[#ffffff]">{topLevelComments.length}</span>
+            <span className="font-semibold text-[#ffffff]">
+              {topLevelComments.length}
+            </span>
             <span className="text-[#8b949e] ml-1">Comments</span>
           </div>
           <div>
@@ -169,7 +189,11 @@ export default function PostThreadPage({ params }: { params: { id: string } }) {
             onClick={handleLike}
             className="flex items-center gap-2 text-[#8b949e] hover:text-[#00ffff] transition-smooth"
           >
-            <Heart className={`w-6 h-6 ${liked ? "fill-[#00ffff] text-[#00ffff]" : ""}`} />
+            <Heart
+              className={`w-6 h-6 ${
+                liked ? "fill-[#00ffff] text-[#00ffff]" : ""
+              }`}
+            />
           </motion.button>
 
           <motion.button
@@ -182,12 +206,21 @@ export default function PostThreadPage({ params }: { params: { id: string } }) {
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={handleRepost}
-            className={`flex items-center gap-2 transition-smooth ${reposted ? "text-[#00ffff]" : "text-[#8b949e] hover:text-[#00ffff]"}`}
+            className={`flex items-center gap-2 transition-smooth ${
+              reposted
+                ? "text-[#00ffff]"
+                : "text-[#8b949e] hover:text-[#00ffff]"
+            }`}
           >
-            <Repeat2 className={`w-6 h-6 ${reposted ? "fill-[#00ffff]" : ""}`} />
+            <Repeat2
+              className={`w-6 h-6 ${reposted ? "fill-[#00ffff]" : ""}`}
+            />
           </motion.button>
 
-          <motion.button whileTap={{ scale: 0.9 }} className="text-[#8b949e] hover:text-[#00ffff] transition-smooth">
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            className="text-[#8b949e] hover:text-[#00ffff] transition-smooth"
+          >
             <Bookmark className="w-6 h-6" />
           </motion.button>
         </div>
@@ -223,9 +256,9 @@ export default function PostThreadPage({ params }: { params: { id: string } }) {
       </div>
 
       {/* Comments */}
-      <div className="divide-y divide-[#30363d]">
+      <div className="divide-y divide-[#303d3f]">
         {topLevelComments.map((c, index) => {
-          const replies = getReplies(c.id)
+          const replies = getReplies(c.id);
           return (
             <motion.div
               key={c.id}
@@ -244,14 +277,24 @@ export default function PostThreadPage({ params }: { params: { id: string } }) {
                   />
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-semibold text-[#ffffff]">{c.displayName}</h4>
+                      <h4 className="font-semibold text-[#ffffff]">
+                        {c.displayName}
+                      </h4>
                       {c.verified && (
-                        <svg className="w-4 h-4 text-[#00ffff]" fill="currentColor" viewBox="0 0 24 24">
+                        <svg
+                          className="w-4 h-4 text-[#00ffff]"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
                           <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                       )}
-                      <span className="text-sm text-[#8b949e]">@{c.username}</span>
-                      <span className="text-sm text-[#6e7681]">· {c.timestamp}</span>
+                      <span className="text-sm text-[#8b949e]">
+                        @{c.username}
+                      </span>
+                      <span className="text-sm text-[#6e7681]">
+                        · {c.timestamp}
+                      </span>
                     </div>
                     <p className="text-[#ffffff] mb-2">{c.content}</p>
                     <div className="flex items-center gap-4">
@@ -259,12 +302,18 @@ export default function PostThreadPage({ params }: { params: { id: string } }) {
                         whileTap={{ scale: 0.9 }}
                         className="flex items-center gap-1 text-[#8b949e] hover:text-[#00ffff] transition-smooth text-sm"
                       >
-                        <Heart className={`w-4 h-4 ${c.liked ? "fill-[#00ffff] text-[#00ffff]" : ""}`} />
+                        <Heart
+                          className={`w-4 h-4 ${
+                            c.liked ? "fill-[#00ffff] text-[#00ffff]" : ""
+                          }`}
+                        />
                         <span>{c.likes}</span>
                       </motion.button>
                       <motion.button
                         whileTap={{ scale: 0.9 }}
-                        onClick={() => setReplyingTo(replyingTo === c.id ? null : c.id)}
+                        onClick={() =>
+                          setReplyingTo(replyingTo === c.id ? null : c.id)
+                        }
                         className="text-[#8b949e] hover:text-[#00ffff] transition-smooth text-sm"
                       >
                         {replyingTo === c.id ? "Cancel" : "Reply"}
@@ -309,7 +358,7 @@ export default function PostThreadPage({ params }: { params: { id: string } }) {
               </div>
 
               {replies.length > 0 && (
-                <div className="ml-12 border-l-2 border-[#30363d]">
+                <div className="ml-12 border-l-2 border-[#303d3d]">
                   {replies.map((reply, replyIndex) => (
                     <motion.div
                       key={reply.id}
@@ -326,22 +375,40 @@ export default function PostThreadPage({ params }: { params: { id: string } }) {
                         />
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-semibold text-[#ffffff] text-sm">{reply.displayName}</h4>
+                            <h4 className="font-semibold text-[#ffffff] text-sm">
+                              {reply.displayName}
+                            </h4>
                             {reply.verified && (
-                              <svg className="w-3 h-3 text-[#00ffff]" fill="currentColor" viewBox="0 0 24 24">
+                              <svg
+                                className="w-3 h-3 text-[#00ffff]"
+                                fill="currentColor"
+                                viewBox="0 0 24 24"
+                              >
                                 <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                               </svg>
                             )}
-                            <span className="text-xs text-[#8b949e]">@{reply.username}</span>
-                            <span className="text-xs text-[#6e7681]">· {reply.timestamp}</span>
+                            <span className="text-xs text-[#8b949e]">
+                              @{reply.username}
+                            </span>
+                            <span className="text-xs text-[#6e7681]">
+                              · {reply.timestamp}
+                            </span>
                           </div>
-                          <p className="text-[#ffffff] text-sm mb-2">{reply.content}</p>
+                          <p className="text-[#ffffff] text-sm mb-2">
+                            {reply.content}
+                          </p>
                           <div className="flex items-center gap-4">
                             <motion.button
                               whileTap={{ scale: 0.9 }}
                               className="flex items-center gap-1 text-[#8b949e] hover:text-[#00ffff] transition-smooth text-xs"
                             >
-                              <Heart className={`w-3 h-3 ${reply.liked ? "fill-[#00ffff] text-[#00ffff]" : ""}`} />
+                              <Heart
+                                className={`w-3 h-3 ${
+                                  reply.liked
+                                    ? "fill-[#00ffff] text-[#00ffff]"
+                                    : ""
+                                }`}
+                              />
                               <span>{reply.likes}</span>
                             </motion.button>
                           </div>
@@ -352,9 +419,9 @@ export default function PostThreadPage({ params }: { params: { id: string } }) {
                 </div>
               )}
             </motion.div>
-          )
+          );
         })}
       </div>
     </div>
-  )
+  );
 }

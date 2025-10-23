@@ -14,12 +14,31 @@ interface CreatePostModalProps {
 
 export default function CreatePostModal({ isOpen, onClose }: CreatePostModalProps) {
   const currentUser = useAppStore((state) => state.currentUser)
+  const addPost = useAppStore((state) => state.addPost)
   const [content, setContent] = useState("")
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Mock post creation
-    console.log("Creating post:", content)
+    if (!content.trim() || !currentUser) return
+
+    // Create a new post object
+    const newPost = {
+      id: `p${Date.now()}`,
+      userId: currentUser.id,
+      username: currentUser.username,
+      displayName: currentUser.displayName,
+      avatar: currentUser.avatar,
+      content,
+      timestamp: "Just now",
+      likes: 0,
+      liked: false,
+      shares: 0,
+      comments: 0,
+      verified: currentUser.verified,
+      // Add other fields as needed
+    }
+
+    addPost(newPost)
     setContent("")
     onClose()
   }
