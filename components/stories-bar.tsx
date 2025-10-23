@@ -58,14 +58,14 @@ export default function StoriesBar() {
               key={userStories[0].id}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => openStoryViewer(0)} // always open at first story
+              onClick={() => openStoryViewer(0)}
               className="flex-shrink-0 flex flex-col items-center gap-1 md:gap-2 group"
             >
               <div
                 className={`p-0.5 rounded-full ${
                   userStories[0].viewed
-                    ? "bg-[#30363d]"
-                    : "bg-gradient-to-br from-[#00ffff] to-[#0ea5e9] glow-primary-sm"
+                    ? "bg-[#30363d]" // grey border if viewed
+                    : "bg-gradient-to-br from-[#00ffff] to-[#0ea5e9] glow-primary-sm" // blue border if not viewed
                 }`}
               >
                 <img
@@ -92,8 +92,8 @@ export default function StoriesBar() {
               <div
                 className={`p-0.5 rounded-full ${
                   story.viewed
-                    ? "bg-[#30363d]"
-                    : "bg-gradient-to-br from-[#00ffff] to-[#0ea5e9] glow-primary-sm"
+                    ? "bg-[#30363d]" // grey border if viewed
+                    : "bg-gradient-to-br from-[#00ffff] to-[#0ea5e9] glow-primary-sm" // blue border if not viewed
                 }`}
               >
                 <img
