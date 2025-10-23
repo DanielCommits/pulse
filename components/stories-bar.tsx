@@ -12,10 +12,12 @@ export default function StoriesBar() {
   const currentUser = useAppStore((state) => state.currentUser)
   const userStories = useAppStore((state) => state.userStories)
   const [viewerOpen, setViewerOpen] = useState(false)
+  const [selectedStories, setSelectedStories] = useState<any[]>([])
   const [selectedStoryIndex, setSelectedStoryIndex] = useState(0)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
-  const openStoryViewer = (index: number) => {
+  const openStoryViewer = (stories: any[], index: number) => {
+    setSelectedStories(stories)
     setSelectedStoryIndex(index)
     setViewerOpen(true)
   }
@@ -53,7 +55,7 @@ export default function StoriesBar() {
               key={story.id}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => openStoryViewer(index)}
+              onClick={() => openStoryViewer(userStories, index)}
               className="flex-shrink-0 flex flex-col items-center gap-1 md:gap-2 group"
             >
               <div
@@ -79,7 +81,7 @@ export default function StoriesBar() {
               key={story.id}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => openStoryViewer(userStories.length + index)}
+              onClick={() => openStoryViewer([story], 0)}
               className="flex-shrink-0 flex flex-col items-center gap-1 md:gap-2 group"
             >
               <div
@@ -104,7 +106,11 @@ export default function StoriesBar() {
       {/* Story Viewer */}
       <AnimatePresence>
         {viewerOpen && (
-          <StoryViewer stories={allStories} initialIndex={selectedStoryIndex} onClose={() => setViewerOpen(false)} />
+          <StoryViewer
+            stories={selectedStories}
+            initialIndex={selectedStoryIndex}
+            onClose={() => setViewerOpen(false)}
+          />
         )}
       </AnimatePresence>
 
