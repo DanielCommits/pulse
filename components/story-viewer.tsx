@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, ChevronLeft, ChevronRight, Pause, Play } from "lucide-react"
+import { X, ChevronLeft, ChevronRight, Pause, Play, Trash } from "lucide-react"
+import { useAppStore } from "@/lib/store"
 import type { Story } from "@/lib/store"
 
 interface StoryViewerProps {
@@ -18,6 +19,8 @@ export default function StoryViewer({ stories, initialIndex, onClose }: StoryVie
   const STORY_DURATION = 5000 // 5 seconds
 
   const currentStory = stories[currentIndex]
+  const currentUser = useAppStore((state) => state.currentUser)
+  const removeStory = useAppStore((state) => state.removeStory) // Add this to your store
 
   useEffect(() => {
     if (isPaused) return
@@ -64,6 +67,18 @@ export default function StoryViewer({ stories, initialIndex, onClose }: StoryVie
     if (e.key === " ") {
       e.preventDefault()
       setIsPaused(!isPaused)
+    }
+  }
+
+  const handleDelete = () => {
+    if (window.confirm("Delete this story?")) {
+      removeStory(currentStory.id)
+      // If this was the last story, close viewer
+      if (stories.length === 1) {
+        onClose()
+      } else if (currentIndex === stories.length - 1) {
+        setCurrentIndex(currentIndex - 1)
+      }
     }
   }
 
@@ -125,6 +140,17 @@ export default function StoryViewer({ stories, initialIndex, onClose }: StoryVie
           >
             <X className="w-4 h-4 md:w-5 md:h-5" />
           </motion.button>
+          {currentStory.userId === currentUser?.id && (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleDelete}
+              className="p-1.5 md:p-2 text-[#ff4d4f] hover:bg-[#1c2128] rounded-lg transition-smooth"
+              title="Delete story"
+            >
+              <Trash className="w-4 h-4 md:w-5 md:h-5" />
+            </motion.button>
+          )}
         </div>
       </div>
 
