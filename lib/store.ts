@@ -111,11 +111,10 @@ export const useAppStore = create<AppState>((set) => ({
         : null,
     }));
   },
-  addStory: (story: Story) => {
+  addStory: (story: Story) =>
     set((state) => ({
       userStories: [...state.userStories, story],
-    }));
-  },
+    })),
   removeStory: (storyId: string) =>
     set((state) => ({
       userStories: state.userStories.filter((s) => s.id !== storyId),
