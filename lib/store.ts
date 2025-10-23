@@ -68,6 +68,7 @@ interface AppState {
   currentUser: User | null;
   isAuthenticated: boolean;
   userStories: Story[];
+  posts: Post[]; // Add this
   setCurrentUser: (user: User | null) => void;
   setAuthenticated: (value: boolean) => void;
   login: (email: string, password: string) => Promise<void>;
@@ -76,12 +77,14 @@ interface AppState {
   addStory: (story: Story) => void;
   removeStory: (storyId: string) => void;
   updateUserProfile: (displayName: string, bio: string) => void;
+  addPost: (post: Post) => void; // Add this
 }
 
 export const useAppStore = create<AppState>((set) => ({
   currentUser: null,
   isAuthenticated: false,
   userStories: [],
+  posts: [], // Add this
   setCurrentUser: (user) => set({ currentUser: user }),
   setAuthenticated: (value) => set({ isAuthenticated: value }),
   login: async (email: string, password: string) => {
@@ -126,4 +129,8 @@ export const useAppStore = create<AppState>((set) => ({
         : null,
     }));
   },
+  addPost: (post: Post) =>
+    set((state) => ({
+      posts: [post, ...state.posts], // Add new post to the top
+    })),
 }));
