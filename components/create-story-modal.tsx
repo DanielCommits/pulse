@@ -1,45 +1,48 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { X, Upload } from "lucide-react"
-import { useAppStore } from "@/lib/store"
-import type { Story } from "@/lib/store"
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, Upload } from "lucide-react";
+import { useAppStore } from "@/lib/store";
+import type { Story } from "@/lib/store";
 
 interface CreateStoryModalProps {
-  isOpen: boolean
-  onClose: () => void
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-export default function CreateStoryModal({ isOpen, onClose }: CreateStoryModalProps) {
-  const currentUser = useAppStore((state) => state.currentUser)
-  const addStory = useAppStore((state) => state.addStory)
-  const [selectedImage, setSelectedImage] = useState<string | null>(null)
-  const [isUploading, setIsUploading] = useState(false)
+export default function CreateStoryModal({
+  isOpen,
+  onClose,
+}: CreateStoryModalProps) {
+  const currentUser = useAppStore((state) => state.currentUser);
+  const addStory = useAppStore((state) => state.addStory);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    setIsUploading(true)
+    setIsUploading(true);
 
     // Simulate file upload delay
-    await new Promise((resolve) => setTimeout(resolve, 500))
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     // Create a data URL for the image
-    const reader = new FileReader()
+    const reader = new FileReader();
     reader.onload = (event) => {
-      const imageUrl = event.target?.result as string
-      setSelectedImage(imageUrl)
-      setIsUploading(false)
-    }
-    reader.readAsDataURL(file)
-  }
+      const imageUrl = event.target?.result as string;
+      setSelectedImage(imageUrl);
+      setIsUploading(false);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handlePublishStory = () => {
-    if (!selectedImage || !currentUser) return
+    if (!selectedImage || !currentUser) return;
 
     const newStory: Story = {
       id: `story-${Date.now()}`,
@@ -47,12 +50,12 @@ export default function CreateStoryModal({ isOpen, onClose }: CreateStoryModalPr
       username: currentUser.username,
       avatar: selectedImage,
       viewed: false,
-    }
+    };
 
-    addStory(newStory)
-    setSelectedImage(null)
-    onClose()
-  }
+    addStory(newStory);
+    setSelectedImage(null);
+    onClose();
+  };
 
   return (
     <AnimatePresence>
@@ -95,12 +98,17 @@ export default function CreateStoryModal({ isOpen, onClose }: CreateStoryModalPr
                     disabled={isUploading}
                     className="hidden"
                   />
-                  <motion.div whileHover={{ scale: 1.1 }} className="flex flex-col items-center justify-center gap-3">
+                  <motion.div
+                    whileHover={{ scale: 1.1 }}
+                    className="flex flex-col items-center justify-center gap-3"
+                  >
                     <div className="w-16 h-16 bg-gradient-to-br from-[#00ffff]/20 to-[#0ea5e9]/20 rounded-full flex items-center justify-center group-hover:from-[#00ffff]/30 group-hover:to-[#0ea5e9]/30 transition-smooth">
                       <Upload className="w-8 h-8 text-[#00ffff]" />
                     </div>
                     <div className="text-center">
-                      <p className="text-[#ffffff] font-semibold">Upload a photo</p>
+                      <p className="text-[#ffffff] font-semibold">
+                        Upload a photo
+                      </p>
                       <p className="text-sm text-[#8b949e]">or drag and drop</p>
                     </div>
                   </motion.div>
@@ -153,5 +161,5 @@ export default function CreateStoryModal({ isOpen, onClose }: CreateStoryModalPr
         </motion.div>
       )}
     </AnimatePresence>
-  )
+  );
 }

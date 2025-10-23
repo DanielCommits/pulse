@@ -74,6 +74,7 @@ interface AppState {
   logout: () => void
   updateUserAvatar: (avatarUrl: string) => void
   addStory: (story: Story) => void
+  removeStory: (storyId: string) => void
   updateUserProfile: (displayName: string, bio: string) => void
 }
 
@@ -113,6 +114,9 @@ export const useAppStore = create<AppState>((set) => ({
       userStories: [...state.userStories, story],
     }))
   },
+  removeStory: (storyId: string) => set((state) => ({
+    userStories: state.userStories.filter((s) => s.id !== storyId)
+  })),
   updateUserProfile: (displayName: string, bio: string) => {
     set((state) => ({
       currentUser: state.currentUser ? { ...state.currentUser, displayName, bio } : null,
