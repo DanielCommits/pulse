@@ -1,16 +1,16 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import Link from "next/link"
-import StoriesBar from "@/components/stories-bar"
-import CreatePostInput from "@/components/create-post-input"
-import PostCard from "@/components/post-card"
-import { useAppStore } from "@/lib/store"
-import { mockPosts } from "@/lib/mock-data"
+import { motion } from "framer-motion";
+import Link from "next/link";
+import StoriesBar from "@/components/stories-bar";
+import CreatePostInput from "@/components/create-post-input";
+import PostCard from "@/components/post-card";
+import { useAppStore } from "@/lib/store";
+import { mockPosts } from "@/lib/mock-data";
 
 export default function HomePage() {
-  const posts = useAppStore((state) => state.posts)
-  const allPosts = [...posts, ...mockPosts]
+  const posts = useAppStore((state) => state.posts);
+  const allPosts = [...posts, ...mockPosts];
 
   return (
     <div className="min-h-screen">
@@ -19,7 +19,9 @@ export default function HomePage() {
         <div className="flex items-center justify-between p-4">
           <h1 className="text-xl font-bold text-[#ffffff]">Home</h1>
           <div className="flex items-center gap-2">
-            <button className="px-4 py-2 text-[#00ffff] border-b-2 border-[#00ffff] font-medium">Following</button>
+            <button className="px-4 py-2 text-[#00ffff] border-b-2 border-[#00ffff] font-medium">
+              Following
+            </button>
           </div>
         </div>
       </div>
@@ -53,5 +55,5 @@ export default function HomePage() {
         </button>
       </div>
     </div>
-  )
+  );
 }
