@@ -75,7 +75,7 @@ export default function StoriesBar() {
                 />
               </div>
               <span className="text-xs text-[#8b949e] group-hover:text-[#ffffff] transition-smooth max-w-[56px] md:max-w-[64px] truncate">
-                me
+                Me
               </span>
             </motion.button>
           )}
