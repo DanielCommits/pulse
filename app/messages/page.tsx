@@ -1,55 +1,80 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { Search, MoreHorizontal, Send, Smile, ImageIcon, Phone, Video, ArrowLeft } from "lucide-react"
-import { mockMessages, mockChatMessages } from "@/lib/mock-data"
-import { useAppStore } from "@/lib/store"
-import Link from "next/link"
+import { useState, useEffect, useRef } from "react";
+import { motion } from "framer-motion";
+import {
+  Search,
+  MoreHorizontal,
+  Send,
+  Smile,
+  ImageIcon,
+  Phone,
+  Video,
+  ArrowLeft,
+} from "lucide-react";
+import { mockMessages, mockChatMessages } from "@/lib/mock-data";
+import { useAppStore } from "@/lib/store";
+import Link from "next/link";
 
 export default function MessagesPage() {
-  const currentUser = useAppStore((state) => state.currentUser)
-  const [selectedChat, setSelectedChat] = useState(mockMessages[0])
-  const [message, setMessage] = useState("")
-  const [messages, setMessages] = useState(mockChatMessages[selectedChat.id] || [])
-  const [isTyping, setIsTyping] = useState(false)
-  const [isChatOpen, setIsChatOpen] = useState(false)
+  const currentUser = useAppStore((state) => state.currentUser);
+  const [selectedChat, setSelectedChat] = useState(mockMessages[0]);
+  const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState(
+    mockChatMessages[selectedChat.id] || []
+  );
+  const [isTyping, setIsTyping] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const messagesRef = useRef<HTMLDivElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  // keep view scrolled to bottom when messages change
+  useEffect(() => {
+    if (messagesRef.current) {
+      messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+    }
+  }, [messages, isChatOpen]);
 
   const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!message.trim()) return
+    e.preventDefault();
+    if (!message.trim()) return;
 
     const newMessage = {
       id: `m${Date.now()}`,
       senderId: currentUser?.id || "1",
       content: message,
-      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      timestamp: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
       isOwn: true,
-    }
+    };
 
-    setMessages([...messages, newMessage])
-    setMessage("")
+    setMessages([...messages, newMessage]);
+    setMessage("");
 
     // Simulate typing indicator
-    setIsTyping(true)
+    setIsTyping(true);
     setTimeout(() => {
-      setIsTyping(false)
-    }, 2000)
-  }
+      setIsTyping(false);
+    }, 2000);
+  };
 
   const handleChatSelect = (chat: (typeof mockMessages)[0]) => {
-    setSelectedChat(chat)
-    setMessages(mockChatMessages[chat.id] || [])
-    setIsChatOpen(true)
-  }
+    setSelectedChat(chat);
+    setMessages(mockChatMessages[chat.id] || []);
+    setIsChatOpen(true);
+  };
 
   return (
     <div className="h-screen flex">
       {/* Conversations List */}
       <div
-        className={`w-full md:w-96 border-r border-[#30363d] flex flex-col bg-[#161b22] ${isChatOpen ? "hidden md:flex" : "flex"}`}
+        className={`w-full md:w-96 border-r border-[#30363d] flex flex-col bg-[#161b22] ${
+          isChatOpen ? "hidden md:flex" : "flex"
+        }`}
       >
         {/* Header */}
         <div className="p-3 md:p-4 border-b border-[#30363d]">
@@ -63,7 +88,9 @@ export default function MessagesPage() {
                 <ArrowLeft className="w-4 h-4 md:w-5 md:h-5" />
               </motion.button>
             </Link>
-            <h1 className="text-lg md:text-xl font-bold text-[#ffffff]">Messages</h1>
+            <h1 className="text-lg md:text-xl font-bold text-[#ffffff]">
+              Messages
+            </h1>
           </div>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-[#6e7681]" />
@@ -98,11 +125,17 @@ export default function MessagesPage() {
               </div>
               <div className="flex-1 text-left min-w-0">
                 <div className="flex items-center justify-between mb-1 gap-2">
-                  <h3 className="font-semibold text-sm md:text-base text-[#ffffff] truncate">{chat.displayName}</h3>
-                  <span className="text-xs text-[#6e7681] flex-shrink-0">{chat.timestamp}</span>
+                  <h3 className="font-semibold text-sm md:text-base text-[#ffffff] truncate">
+                    {chat.displayName}
+                  </h3>
+                  <span className="text-xs text-[#6e7681] flex-shrink-0">
+                    {chat.timestamp}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between gap-2">
-                  <p className="text-xs md:text-sm text-[#8b949e] truncate">{chat.lastMessage}</p>
+                  <p className="text-xs md:text-sm text-[#8b949e] truncate">
+                    {chat.lastMessage}
+                  </p>
                   {chat.unread > 0 && (
                     <span className="ml-2 px-2 py-0.5 bg-[#00ffff] text-[#0d1117] text-xs font-semibold rounded-full flex-shrink-0">
                       {chat.unread}
@@ -116,7 +149,11 @@ export default function MessagesPage() {
       </div>
 
       {/* Chat Window */}
-      <div className={`flex-1 flex flex-col bg-[#0d1117] ${isChatOpen ? "flex" : "hidden md:flex"}`}>
+      <div
+        className={`flex-1 flex flex-col bg-[#0d1117] ${
+          isChatOpen ? "flex" : "hidden md:flex"
+        }`}
+      >
         {/* Chat Header */}
         <div className="p-3 md:p-4 border-b border-[#30363d] flex items-center justify-between bg-[#161b22]">
           <div className="flex items-center gap-2 md:gap-3 min-w-0">
@@ -139,8 +176,12 @@ export default function MessagesPage() {
               )}
             </div>
             <div className="min-w-0">
-              <h2 className="font-semibold text-sm md:text-base text-[#ffffff] truncate">{selectedChat.displayName}</h2>
-              <p className="text-xs md:text-sm text-[#8b949e]">{selectedChat.online ? "Active now" : "Offline"}</p>
+              <h2 className="font-semibold text-sm md:text-base text-[#ffffff] truncate">
+                {selectedChat.displayName}
+              </h2>
+              <p className="text-xs md:text-sm text-[#8b949e]">
+                {selectedChat.online ? "Active now" : "Offline"}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
@@ -169,7 +210,14 @@ export default function MessagesPage() {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-2 md:p-4 space-y-2 md:space-y-4">
+        <div
+          ref={messagesRef}
+          className="flex-1 overflow-y-auto p-2 md:p-4 space-y-2 md:space-y-4"
+          // add extra bottom padding so messages aren't hidden behind the mobile navbar
+          style={{
+            paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 56px)",
+          }}
+        >
           {messages.map((msg, index) => (
             <motion.div
               key={msg.id}
@@ -179,7 +227,9 @@ export default function MessagesPage() {
               className={`flex ${msg.isOwn ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`flex gap-1 md:gap-2 max-w-[85%] md:max-w-[70%] ${msg.isOwn ? "flex-row-reverse" : "flex-row"}`}
+                className={`flex gap-1 md:gap-2 max-w-[85%] md:max-w-[70%] ${
+                  msg.isOwn ? "flex-row-reverse" : "flex-row"
+                }`}
               >
                 {!msg.isOwn && (
                   <img
@@ -188,7 +238,11 @@ export default function MessagesPage() {
                     className="w-6 h-6 md:w-8 md:h-8 rounded-full border-2 border-[#30363d] object-cover flex-shrink-0"
                   />
                 )}
-                <div className={`flex flex-col ${msg.isOwn ? "items-end" : "items-start"}`}>
+                <div
+                  className={`flex flex-col ${
+                    msg.isOwn ? "items-end" : "items-start"
+                  }`}
+                >
                   <div
                     className={`px-3 md:px-4 py-1.5 md:py-2 rounded-2xl text-xs md:text-sm ${
                       msg.isOwn
@@ -198,7 +252,9 @@ export default function MessagesPage() {
                   >
                     <p className="leading-relaxed">{msg.content}</p>
                   </div>
-                  <span className="text-xs text-[#6e7681] mt-0.5 md:mt-1 px-2">{msg.timestamp}</span>
+                  <span className="text-xs text-[#6e7681] mt-0.5 md:mt-1 px-2">
+                    {msg.timestamp}
+                  </span>
                 </div>
               </div>
             </motion.div>
@@ -206,7 +262,11 @@ export default function MessagesPage() {
 
           {/* Typing indicator */}
           {isTyping && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex justify-start">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex justify-start"
+            >
               <div className="flex gap-1 md:gap-2 items-end">
                 <img
                   src={selectedChat.avatar || "/placeholder.svg"}
@@ -218,17 +278,29 @@ export default function MessagesPage() {
                     <motion.div
                       className="w-1.5 h-1.5 md:w-2 md:h-2 bg-[#8b949e] rounded-full"
                       animate={{ y: [0, -5, 0] }}
-                      transition={{ duration: 0.6, repeat: Number.POSITIVE_INFINITY, delay: 0 }}
+                      transition={{
+                        duration: 0.6,
+                        repeat: Number.POSITIVE_INFINITY,
+                        delay: 0,
+                      }}
                     />
                     <motion.div
                       className="w-1.5 h-1.5 md:w-2 md:h-2 bg-[#8b949e] rounded-full"
                       animate={{ y: [0, -5, 0] }}
-                      transition={{ duration: 0.6, repeat: Number.POSITIVE_INFINITY, delay: 0.2 }}
+                      transition={{
+                        duration: 0.6,
+                        repeat: Number.POSITIVE_INFINITY,
+                        delay: 0.2,
+                      }}
                     />
                     <motion.div
                       className="w-1.5 h-1.5 md:w-2 md:h-2 bg-[#8b949e] rounded-full"
                       animate={{ y: [0, -5, 0] }}
-                      transition={{ duration: 0.6, repeat: Number.POSITIVE_INFINITY, delay: 0.4 }}
+                      transition={{
+                        duration: 0.6,
+                        repeat: Number.POSITIVE_INFINITY,
+                        delay: 0.4,
+                      }}
                     />
                   </div>
                 </div>
@@ -238,7 +310,16 @@ export default function MessagesPage() {
         </div>
 
         {/* Message Input */}
-        <form onSubmit={handleSendMessage} className="p-2 md:p-4 border-t border-[#30363d] bg-[#161b22]">
+        <form
+          onSubmit={handleSendMessage}
+          className="p-2 md:p-4 border-t border-[#30363d] bg-[#161b22] sticky"
+          // place the input above the mobile bottom nav by offsetting from the viewport bottom
+          style={{
+            bottom: "calc(env(safe-area-inset-bottom, 0px) + 56px)",
+            paddingBottom: "env(safe-area-inset-bottom, 1rem)",
+            zIndex: 60,
+          }}
+        >
           <div className="flex items-center gap-2 md:gap-3">
             <button
               type="button"
@@ -253,6 +334,13 @@ export default function MessagesPage() {
               <Smile className="w-4 h-4 md:w-5 md:h-5" />
             </button>
             <input
+              ref={inputRef}
+              onFocus={() =>
+                messagesRef.current?.scrollTo({
+                  top: messagesRef.current.scrollHeight,
+                  behavior: "smooth",
+                })
+              }
               type="text"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
@@ -272,5 +360,5 @@ export default function MessagesPage() {
         </form>
       </div>
     </div>
-  )
+  );
 }
