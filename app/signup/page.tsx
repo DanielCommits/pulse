@@ -10,10 +10,10 @@ import { useAppStore } from "@/lib/store"
 
 export default function SignupPage() {
   const router = useRouter()
-  const { login, setCurrentUser } = useAppStore((state) => ({
-    login: state.login,
-    setCurrentUser: state.setCurrentUser,
-  }))
+  // Avoid returning a new object from the selector (causes getSnapshot warning).
+  // Select individual store slices to keep selectors stable.
+  const login = useAppStore((state) => state.login)
+  const setCurrentUser = useAppStore((state) => state.setCurrentUser)
   const [formData, setFormData] = useState({
     displayName: "",
     username: "",
@@ -35,8 +35,9 @@ export default function SignupPage() {
         displayName: formData.displayName,
         avatar: "/diverse-profile-avatars.png",
         bio: "New to Pulse",
-        followers: 0,
-        following: 0,
+          followers: 0,
+          following: 0,
+          homies: 0,
         verified: false,
       }
 
