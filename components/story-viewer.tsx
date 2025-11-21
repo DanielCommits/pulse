@@ -24,8 +24,8 @@ export default function StoryViewer({
 
   const currentStory = stories[currentIndex];
   const currentUser = useAppStore((state) => state.currentUser);
-  const removeStory = useAppStore((state) => state.removeStory); // Add this to your store
-  const markStoryViewed = useAppStore((state) => state.markStoryViewed); // Add this to your store
+  const removeStory = useAppStore((state) => state.removeStory);
+  const markStoryViewed = useAppStore((state) => state.markStoryViewed);
 
   useEffect(() => {
     if (isPaused) return;
@@ -33,7 +33,6 @@ export default function StoryViewer({
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
-          // Move to next story
           if (currentIndex < stories.length - 1) {
             setCurrentIndex(currentIndex + 1);
             return 0;
@@ -78,7 +77,6 @@ export default function StoryViewer({
   const handleDelete = () => {
     if (window.confirm("Delete this story?")) {
       removeStory(currentStory.id);
-      // If this was the last story, close viewer
       if (stories.length === 1) {
         onClose();
       } else if (currentIndex === stories.length - 1) {
@@ -93,7 +91,6 @@ export default function StoryViewer({
   }, [currentIndex, isPaused]);
 
   useEffect(() => {
-    // Mark current story as viewed when opened
     if (currentStory && !currentStory.viewed) {
       markStoryViewed(currentStory.id);
     }
@@ -198,6 +195,13 @@ export default function StoryViewer({
             alt="Story"
             className="w-full h-full md:rounded-lg object-cover"
           />
+
+          {/* Caption overlay */}
+          {currentStory.caption && (
+            <div className="absolute bottom-6 left-4 right-4 p-3 bg-black/40 rounded-md text-white text-sm md:text-base">
+              {currentStory.caption}
+            </div>
+          )}
         </motion.div>
       </AnimatePresence>
 

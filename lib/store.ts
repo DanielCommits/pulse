@@ -38,6 +38,7 @@ export interface Story {
   username: string;
   avatar: string;
   viewed: boolean;
+  caption?: string;
 }
 
 export interface Message {
