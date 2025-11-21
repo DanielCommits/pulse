@@ -19,6 +19,7 @@ export default function CreateStoryModal({
   const currentUser = useAppStore((state) => state.currentUser);
   const addStory = useAppStore((state) => state.addStory);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [caption, setCaption] = useState(""); // caption state
   const [isUploading, setIsUploading] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false); // fullscreen preview
 
@@ -49,10 +50,12 @@ export default function CreateStoryModal({
       username: currentUser.username,
       avatar: selectedImage,
       viewed: false,
+      caption: caption || "", // save caption
     };
 
     addStory(newStory);
     setSelectedImage(null);
+    setCaption("");
     onClose();
   };
 
@@ -89,7 +92,7 @@ export default function CreateStoryModal({
               </div>
 
               {/* Content */}
-              <div className="p-6">
+              <div className="p-6 space-y-4">
                 {!selectedImage ? (
                   <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-[#30363d] rounded-xl hover:border-[#00ffff] transition-smooth cursor-pointer group">
                     <input
@@ -113,8 +116,8 @@ export default function CreateStoryModal({
                     </motion.div>
                   </label>
                 ) : (
-                  <div className="space-y-4">
-                    {/* IMAGE PREVIEW WITH CLICKABLE FULLSCREEN */}
+                  <>
+                    {/* IMAGE PREVIEW */}
                     <div
                       className="relative w-full max-h-[60vh] rounded-xl overflow-hidden border border-[#30363d] flex items-center justify-center bg-[#0d1117] cursor-pointer"
                       onClick={() => setIsPreviewOpen(true)}
@@ -125,6 +128,14 @@ export default function CreateStoryModal({
                         className="max-h-full max-w-full object-contain"
                       />
                     </div>
+
+                    {/* CAPTION INPUT */}
+                    <textarea
+                      value={caption}
+                      onChange={(e) => setCaption(e.target.value)}
+                      placeholder="Add a caption..."
+                      className="w-full p-2 rounded-lg bg-[#0d1117] border border-[#30363d] text-[#ffffff] placeholder-[#8b949e] focus:outline-none focus:border-[#00ffff] transition-smooth resize-none"
+                    />
 
                     <label className="flex items-center justify-center gap-2 px-4 py-2 bg-[#0d1117] border border-[#30363d] rounded-lg hover:border-[#00ffff] transition-smooth cursor-pointer text-[#8b949e] hover:text-[#00ffff]">
                       <input
@@ -137,7 +148,7 @@ export default function CreateStoryModal({
                       <Upload className="w-4 h-4" />
                       <span className="text-sm">Change image</span>
                     </label>
-                  </div>
+                  </>
                 )}
               </div>
 
