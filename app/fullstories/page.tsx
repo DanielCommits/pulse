@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import FullStories from "@/components/fullstories/page"
+import FullStories from "@/components/fullstories/page";
 
 export default function Page() {
-  return <FullStories />
+  return <FullStories />;
 }
