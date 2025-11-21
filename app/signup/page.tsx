@@ -1,32 +1,32 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { useAppStore } from "@/lib/store"
+import { useState } from "react";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAppStore } from "@/lib/store";
 
 export default function SignupPage() {
-  const router = useRouter()
+  const router = useRouter();
   // Avoid returning a new object from the selector (causes getSnapshot warning).
   // Select individual store slices to keep selectors stable.
-  const login = useAppStore((state) => state.login)
-  const setCurrentUser = useAppStore((state) => state.setCurrentUser)
+  const login = useAppStore((state) => state.login);
+  const setCurrentUser = useAppStore((state) => state.setCurrentUser);
   const [formData, setFormData] = useState({
     displayName: "",
     username: "",
     email: "",
     password: "",
-  })
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError("")
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
 
     try {
       const newUser = {
@@ -35,38 +35,38 @@ export default function SignupPage() {
         displayName: formData.displayName,
         avatar: "/diverse-profile-avatars.png",
         bio: "New to Pulse",
-          followers: 0,
-          following: 0,
-          homies: 0,
+        followers: 0,
+        following: 0,
+        homies: 0,
         verified: false,
-      }
+      };
 
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      setCurrentUser(newUser)
-      await login(formData.email, formData.password)
-      router.push("/home")
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      setCurrentUser(newUser);
+      await login(formData.email, formData.password);
+      router.push("/home");
     } catch (err) {
-      setError("Failed to create account. Please try again.")
+      setError("Failed to create account. Please try again.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
-    }))
-  }
+    }));
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
       {/* Animated background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#0d1117] via-[#161b22] to-[#0d1117]" />
 
-      {/* Animated glow orbs */}
+      {/* Animated glow orbs (reduced sizes for desktop fit) */}
       <motion.div
-        className="absolute top-1/4 right-1/4 w-96 h-96 bg-[#00ffff] rounded-full opacity-10 blur-3xl"
+        className="absolute top-1/6 right-1/6 w-48 h-48 md:w-64 md:h-64 lg:w-80 lg:h-80 bg-[#00ffff] rounded-full opacity-10 blur-3xl"
         animate={{
           scale: [1, 1.2, 1],
           opacity: [0.1, 0.15, 0.1],
@@ -78,7 +78,7 @@ export default function SignupPage() {
         }}
       />
       <motion.div
-        className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-[#0ea5e9] rounded-full opacity-10 blur-3xl"
+        className="absolute bottom-1/6 left-1/6 w-48 h-48 md:w-64 md:h-64 lg:w-80 lg:h-80 bg-[#0ea5e9] rounded-full opacity-10 blur-3xl"
         animate={{
           scale: [1.2, 1, 1.2],
           opacity: [0.15, 0.1, 0.15],
@@ -102,13 +102,23 @@ export default function SignupPage() {
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.5 }}
-            className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-[#00ffff] to-[#0ea5e9] mb-4 glow-primary"
+            className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-[#00ffff] to-[#0ea5e9] mb-3 glow-primary"
           >
-            <svg className="w-10 h-10 text-[#0d1117]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            <svg
+              className="w-8 h-8 text-[#0d1117]"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 10V3L4 14h7v7l9-11h-7z"
+              />
             </svg>
           </motion.div>
-          <h1 className="text-4xl font-bold text-[#ffffff] mb-2">Pulse</h1>
+          <h1 className="text-3xl font-bold text-[#ffffff] mb-1">Pulse</h1>
           <p className="text-[#8b949e]">Join the conversation</p>
         </div>
 
@@ -117,13 +127,18 @@ export default function SignupPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.5 }}
-          className="bg-[#161b22] border border-[#30363d] rounded-xl p-8 backdrop-blur-sm"
+          className="bg-[#161b22] border border-[#30363d] rounded-xl p-5 backdrop-blur-sm"
         >
-          <h2 className="text-2xl font-semibold text-[#ffffff] mb-6">Create your account</h2>
+          <h2 className="text-2xl font-semibold text-[#ffffff] mb-6">
+            Create your account
+          </h2>
 
           <form onSubmit={handleSignup} className="space-y-5">
             <div>
-              <label htmlFor="displayName" className="block text-sm font-medium text-[#8b949e] mb-2">
+              <label
+                htmlFor="displayName"
+                className="block text-sm font-medium text-[#8b949e] mb-2"
+              >
                 Display Name
               </label>
               <input
@@ -132,14 +147,17 @@ export default function SignupPage() {
                 type="text"
                 value={formData.displayName}
                 onChange={handleChange}
-                className="w-full px-4 py-3 bg-[#0d1117] border border-[#30363d] rounded-lg text-[#ffffff] placeholder-[#6e7681] focus:outline-none focus:border-[#00ffff] focus:ring-1 focus:ring-[#00ffff] transition-smooth"
+                className="w-full px-3 py-2 bg-[#0d1117] border border-[#30363d] rounded-lg text-[#ffffff] placeholder-[#6e7681] focus:outline-none focus:border-[#00ffff] focus:ring-1 focus:ring-[#00ffff] transition-smooth"
                 placeholder="John Doe"
                 required
               />
             </div>
 
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-[#8b949e] mb-2">
+              <label
+                htmlFor="username"
+                className="block text-sm font-medium text-[#8b949e] mb-2"
+              >
                 Username
               </label>
               <input
@@ -148,14 +166,17 @@ export default function SignupPage() {
                 type="text"
                 value={formData.username}
                 onChange={handleChange}
-                className="w-full px-4 py-3 bg-[#0d1117] border border-[#30363d] rounded-lg text-[#ffffff] placeholder-[#6e7681] focus:outline-none focus:border-[#00ffff] focus:ring-1 focus:ring-[#00ffff] transition-smooth"
+                className="w-full px-3 py-2 bg-[#0d1117] border border-[#30363d] rounded-lg text-[#ffffff] placeholder-[#6e7681] focus:outline-none focus:border-[#00ffff] focus:ring-1 focus:ring-[#00ffff] transition-smooth"
                 placeholder="johndoe"
                 required
               />
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-[#8b949e] mb-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-[#8b949e] mb-2"
+              >
                 Email
               </label>
               <input
@@ -164,14 +185,17 @@ export default function SignupPage() {
                 type="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-4 py-3 bg-[#0d1117] border border-[#30363d] rounded-lg text-[#ffffff] placeholder-[#6e7681] focus:outline-none focus:border-[#00ffff] focus:ring-1 focus:ring-[#00ffff] transition-smooth"
+                className="w-full px-3 py-2 bg-[#0d1117] border border-[#30363d] rounded-lg text-[#ffffff] placeholder-[#6e7681] focus:outline-none focus:border-[#00ffff] focus:ring-1 focus:ring-[#00ffff] transition-smooth"
                 placeholder="you@example.com"
                 required
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-[#8b949e] mb-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-[#8b949e] mb-2"
+              >
                 Password
               </label>
               <input
@@ -180,11 +204,13 @@ export default function SignupPage() {
                 type="password"
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full px-4 py-3 bg-[#0d1117] border border-[#30363d] rounded-lg text-[#ffffff] placeholder-[#6e7681] focus:outline-none focus:border-[#00ffff] focus:ring-1 focus:ring-[#00ffff] transition-smooth"
+                className="w-full px-3 py-2 bg-[#0d1117] border border-[#30363d] rounded-lg text-[#ffffff] placeholder-[#6e7681] focus:outline-none focus:border-[#00ffff] focus:ring-1 focus:ring-[#00ffff] transition-smooth"
                 placeholder="••••••••"
                 required
               />
-              <p className="text-xs text-[#6e7681] mt-2">Must be at least 8 characters</p>
+              <p className="text-xs text-[#6e7681] mt-2">
+                Must be at least 8 characters
+              </p>
             </div>
 
             {error && (
@@ -202,7 +228,7 @@ export default function SignupPage() {
               disabled={isLoading}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full py-3 bg-gradient-to-r from-[#00ffff] to-[#0ea5e9] text-[#0d1117] font-semibold rounded-lg hover:opacity-90 transition-smooth disabled:opacity-50 disabled:cursor-not-allowed glow-primary-sm"
+              className="w-full py-2.5 bg-gradient-to-r from-[#00ffff] to-[#0ea5e9] text-[#0d1117] font-semibold rounded-lg hover:opacity-90 transition-smooth disabled:opacity-50 disabled:cursor-not-allowed glow-primary-sm"
             >
               {isLoading ? "Creating account..." : "Create account"}
             </motion.button>
@@ -210,17 +236,21 @@ export default function SignupPage() {
 
           <div className="mt-6 text-center text-sm text-[#8b949e]">
             Already have an account?{" "}
-            <Link href="/login" className="text-[#00ffff] hover:text-[#00e5e5] font-medium transition-smooth">
+            <Link
+              href="/login"
+              className="text-[#00ffff] hover:text-[#00e5e5] font-medium transition-smooth"
+            >
               Sign in
             </Link>
           </div>
         </motion.div>
 
         {/* Footer */}
-        <p className="text-center text-xs text-[#6e7681] mt-8">
-          By continuing, you agree to Pulse's Terms of Service and Privacy Policy
+        <p className="text-center text-xs text-[#6e7681] mt-4">
+          By continuing, you agree to Pulse's Terms of Service and Privacy
+          Policy
         </p>
       </motion.div>
     </div>
-  )
+  );
 }

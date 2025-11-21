@@ -36,9 +36,9 @@ export default function LoginPage() {
       {/* Animated background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#0d1117] via-[#161b22] to-[#0d1117]" />
 
-      {/* Animated glow orbs */}
+      {/* Animated glow orbs (reduced sizes for desktop fit) */}
       <motion.div
-        className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#00ffff] rounded-full opacity-10 blur-3xl"
+        className="absolute top-1/6 left-1/6 w-48 h-48 md:w-64 md:h-64 lg:w-80 lg:h-80 bg-[#00ffff] rounded-full opacity-10 blur-3xl"
         animate={{
           scale: [1, 1.2, 1],
           opacity: [0.1, 0.15, 0.1],
@@ -50,7 +50,7 @@ export default function LoginPage() {
         }}
       />
       <motion.div
-        className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#0ea5e9] rounded-full opacity-10 blur-3xl"
+        className="absolute bottom-1/6 right-1/6 w-48 h-48 md:w-64 md:h-64 lg:w-80 lg:h-80 bg-[#0ea5e9] rounded-full opacity-10 blur-3xl"
         animate={{
           scale: [1.2, 1, 1.2],
           opacity: [0.15, 0.1, 0.15],
@@ -74,13 +74,13 @@ export default function LoginPage() {
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.5 }}
-            className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-[#00ffff] to-[#0ea5e9] mb-4 glow-primary"
+            className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-[#00ffff] to-[#0ea5e9] mb-3 glow-primary"
           >
-            <svg className="w-10 h-10 text-[#0d1117]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-8 h-8 text-[#0d1117]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
           </motion.div>
-          <h1 className="text-4xl font-bold text-[#ffffff] mb-2">Pulse</h1>
+          <h1 className="text-3xl font-bold text-[#ffffff] mb-1">Pulse</h1>
           <p className="text-[#8b949e]">Connect, Share, Pulse</p>
         </div>
 
@@ -89,7 +89,7 @@ export default function LoginPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.5 }}
-          className="bg-[#161b22] border border-[#30363d] rounded-xl p-8 backdrop-blur-sm"
+          className="bg-[#161b22] border border-[#30363d] rounded-xl p-5 backdrop-blur-sm"
         >
           <h2 className="text-2xl font-semibold text-[#ffffff] mb-6">Welcome back</h2>
 
@@ -103,7 +103,7 @@ export default function LoginPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 bg-[#0d1117] border border-[#30363d] rounded-lg text-[#ffffff] placeholder-[#6e7681] focus:outline-none focus:border-[#00ffff] focus:ring-1 focus:ring-[#00ffff] transition-smooth"
+                className="w-full px-3 py-2 bg-[#0d1117] border border-[#30363d] rounded-lg text-[#ffffff] placeholder-[#6e7681] focus:outline-none focus:border-[#00ffff] focus:ring-1 focus:ring-[#00ffff] transition-smooth"
                 placeholder="you@example.com"
                 required
               />
@@ -118,7 +118,7 @@ export default function LoginPage() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-[#0d1117] border border-[#30363d] rounded-lg text-[#ffffff] placeholder-[#6e7681] focus:outline-none focus:border-[#00ffff] focus:ring-1 focus:ring-[#00ffff] transition-smooth"
+                className="w-full px-3 py-2 bg-[#0d1117] border border-[#30363d] rounded-lg text-[#ffffff] placeholder-[#6e7681] focus:outline-none focus:border-[#00ffff] focus:ring-1 focus:ring-[#00ffff] transition-smooth"
                 placeholder="••••••••"
                 required
               />
@@ -152,7 +152,7 @@ export default function LoginPage() {
               disabled={isLoading}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full py-3 bg-gradient-to-r from-[#00ffff] to-[#0ea5e9] text-[#0d1117] font-semibold rounded-lg hover:opacity-90 transition-smooth disabled:opacity-50 disabled:cursor-not-allowed glow-primary-sm"
+              className="w-full py-2.5 bg-gradient-to-r from-[#00ffff] to-[#0ea5e9] text-[#0d1117] font-semibold rounded-lg hover:opacity-90 transition-smooth disabled:opacity-50 disabled:cursor-not-allowed glow-primary-sm"
             >
               {isLoading ? "Signing in..." : "Sign in"}
             </motion.button>
