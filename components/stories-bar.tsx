@@ -52,6 +52,21 @@ export default function StoriesBar() {
             </span>
           </motion.button>
 
+          {/* ✅ See All Stories Button - moved before stories */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => router.push("/fullstories")}
+            className="flex-shrink-0 flex flex-col items-center justify-center gap-1 md:gap-2 text-xs text-[#8b949e] hover:text-white"
+          >
+            <div className="w-14 h-14 md:w-16 md:h-16 rounded-full border-2 border-[#30363d] flex items-center justify-center">
+              <span className="font-semibold text-[#0ea5e9]">→</span>
+            </div>
+            <span className="text-xs text-[#8b949e] group-hover:text-[#ffffff] max-w-[56px] md:max-w-[64px] truncate">
+              See All
+            </span>
+          </motion.button>
+
           {/* User's own story */}
           {userStories.length > 0 && (
             <motion.button
@@ -107,21 +122,6 @@ export default function StoriesBar() {
               </span>
             </motion.button>
           ))}
-
-          {/* ✅ See All Stories Button */}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => router.push("/fullstories")}
-            className="flex-shrink-0 flex flex-col items-center justify-center gap-1 md:gap-2 text-xs text-[#8b949e] hover:text-white"
-          >
-            <div className="w-14 h-14 md:w-16 md:h-16 rounded-full border-2 border-[#30363d] flex items-center justify-center">
-              <span className="font-semibold text-[#0ea5e9]">→</span>
-            </div>
-            <span className="text-xs text-[#8b949e] group-hover:text-[#ffffff] max-w-[56px] md:max-w-[64px] truncate">
-              See All
-            </span>
-          </motion.button>
         </div>
       </div>
 
