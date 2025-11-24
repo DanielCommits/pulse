@@ -76,68 +76,106 @@ export default function CreateStoryModal({
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-gradient-to-br from-[#161b22] to-[#1c2128] border border-[#30363d] rounded-2xl w-full max-w-md overflow-hidden"
+              className={`border border-[#30363d] rounded-2xl w-full overflow-hidden transition-all duration-300 ${
+                selectedImage
+                  ? "max-w-full h-[90vh] bg-gradient-to-br from-[#161b22] to-[#1c2128]"
+                  : "max-w-md bg-gradient-to-br from-[#161b22] to-[#1c2128]"
+              }`}
             >
-              {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b border-[#30363d]">
-                <h2 className="text-xl font-bold text-[#ffffff]">Create Story</h2>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={onClose}
-                  className="p-2 text-[#8b949e] hover:text-[#00ffff] hover:bg-[#1c2128] rounded-lg transition-smooth"
-                >
-                  <X className="w-5 h-5" />
-                </motion.button>
-              </div>
-
-              {/* Content */}
-              <div className="p-6 space-y-4">
-                {!selectedImage ? (
-                  <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-[#30363d] rounded-xl hover:border-[#00ffff] transition-smooth cursor-pointer group">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageSelect}
-                      disabled={isUploading}
-                      className="hidden"
-                    />
-                    <motion.div
-                      whileHover={{ scale: 1.1 }}
-                      className="flex flex-col items-center justify-center gap-3"
+              {selectedImage ? (
+                // FULLSCREEN LAYOUT WHEN IMAGE SELECTED
+                <>
+                  {/* TOP HEADER WITH CLOSE BUTTON ON LEFT */}
+                  <div className="bg-gradient-to-br from-[#161b22] to-[#1c2128] px-6 py-4 border-b border-[#30363d] flex items-center justify-start">
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={onClose}
+                      className="p-2 text-[#8b949e] hover:text-[#00ffff] hover:bg-[#1c2128] rounded-lg transition-smooth"
                     >
-                      <div className="w-16 h-16 bg-gradient-to-br from-[#00ffff]/20 to-[#0ea5e9]/20 rounded-full flex items-center justify-center group-hover:from-[#00ffff]/30 group-hover:to-[#0ea5e9]/30 transition-smooth">
-                        <Upload className="w-8 h-8 text-[#00ffff]" />
-                      </div>
-                      <div className="text-center">
-                        <p className="text-[#ffffff] font-semibold">Upload a photo</p>
-                        <p className="text-sm text-[#8b949e]">or drag and drop</p>
-                      </div>
-                    </motion.div>
-                  </label>
-                ) : (
-                  <>
-                    {/* IMAGE PREVIEW */}
+                      <X className="w-5 h-5" />
+                    </motion.button>
+                  </div>
+
+                  {/* CENTERED IMAGE AREA */}
+                  <div className="flex-1 flex items-center justify-center p-6 overflow-auto">
                     <div
-                      className="relative w-full max-h-[60vh] rounded-xl overflow-hidden border border-[#30363d] flex items-center justify-center bg-[#0d1117] cursor-pointer"
+                      className="relative cursor-pointer"
                       onClick={() => setIsPreviewOpen(true)}
                     >
                       <img
                         src={selectedImage || "/placeholder.svg"}
                         alt="Story preview"
-                        className="max-h-full max-w-full object-contain"
+                        className="max-h-[calc(90vh-300px)] max-w-full object-contain"
                       />
                     </div>
+                  </div>
 
+                  {/* BOTTOM ACTION BAR */}
+                  <div className="bg-gradient-to-br from-[#161b22] to-[#1c2128] border-t border-[#30363d] px-6 py-4 space-y-4">
                     {/* CAPTION INPUT */}
                     <textarea
                       value={caption}
                       onChange={(e) => setCaption(e.target.value)}
                       placeholder="Add a caption..."
-                      className="w-full p-2 rounded-lg bg-[#0d1117] border border-[#30363d] text-[#ffffff] placeholder-[#8b949e] focus:outline-none focus:border-[#00ffff] transition-smooth resize-none"
+                      className="w-full p-3 rounded-lg bg-[#0d1117] border border-[#30363d] text-[#ffffff] placeholder-[#8b949e] focus:outline-none focus:border-[#00ffff] transition-smooth resize-none text-sm"
+                      rows={2}
                     />
 
-                    <label className="flex items-center justify-center gap-2 px-4 py-2 bg-[#0d1117] border border-[#30363d] rounded-lg hover:border-[#00ffff] transition-smooth cursor-pointer text-[#8b949e] hover:text-[#00ffff]">
+                    {/* ACTION BUTTONS */}
+                    <div className="flex gap-3">
+                      <label className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-[#0d1117] border border-[#30363d] rounded-lg hover:border-[#00ffff] transition-smooth cursor-pointer text-[#8b949e] hover:text-[#00ffff] font-semibold">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageSelect}
+                          disabled={isUploading}
+                          className="hidden"
+                        />
+                        <Upload className="w-4 h-4" />
+                        <span className="text-sm">Change image</span>
+                      </label>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={onClose}
+                        className="flex-1 py-2 bg-[#0d1117] border border-[#30363d] text-[#ffffff] font-semibold rounded-lg hover:border-[#00ffff] hover:text-[#00ffff] transition-smooth"
+                      >
+                        Cancel
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handlePublishStory}
+                        disabled={isUploading}
+                        className="flex-1 py-2 bg-gradient-to-r from-[#00ffff] to-[#0ea5e9] text-[#0d1117] font-semibold rounded-lg hover:opacity-90 transition-smooth disabled:opacity-50 disabled:cursor-not-allowed glow-primary-sm"
+                      >
+                        {isUploading ? "Uploading..." : "Publish"}
+                      </motion.button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                // ORIGINAL MODAL LAYOUT FOR DRAG/DROP
+                <>
+                  {/* Header */}
+                  <div className="flex items-center justify-between p-6 border-b border-[#30363d]">
+                    <h2 className="text-xl font-bold text-[#ffffff]">
+                      Create Story
+                    </h2>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={onClose}
+                      className="p-2 text-[#8b949e] hover:text-[#00ffff] hover:bg-[#1c2128] rounded-lg transition-smooth"
+                    >
+                      <X className="w-5 h-5" />
+                    </motion.button>
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-6 space-y-4">
+                    <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-[#30363d] rounded-xl hover:border-[#00ffff] transition-smooth cursor-pointer group">
                       <input
                         type="file"
                         accept="image/*"
@@ -145,33 +183,47 @@ export default function CreateStoryModal({
                         disabled={isUploading}
                         className="hidden"
                       />
-                      <Upload className="w-4 h-4" />
-                      <span className="text-sm">Change image</span>
+                      <motion.div
+                        whileHover={{ scale: 1.1 }}
+                        className="flex flex-col items-center justify-center gap-3"
+                      >
+                        <div className="w-16 h-16 bg-gradient-to-br from-[#00ffff]/20 to-[#0ea5e9]/20 rounded-full flex items-center justify-center group-hover:from-[#00ffff]/30 group-hover:to-[#0ea5e9]/30 transition-smooth">
+                          <Upload className="w-8 h-8 text-[#00ffff]" />
+                        </div>
+                        <div className="text-center">
+                          <p className="text-[#ffffff] font-semibold">
+                            Upload a photo
+                          </p>
+                          <p className="text-sm text-[#8b949e]">
+                            or drag and drop
+                          </p>
+                        </div>
+                      </motion.div>
                     </label>
-                  </>
-                )}
-              </div>
+                  </div>
 
-              {/* Footer */}
-              <div className="flex gap-3 p-6 border-t border-[#30363d]">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={onClose}
-                  className="flex-1 py-3 bg-[#0d1117] border border-[#30363d] text-[#ffffff] font-semibold rounded-xl hover:border-[#00ffff] hover:text-[#00ffff] transition-smooth"
-                >
-                  Cancel
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handlePublishStory}
-                  disabled={!selectedImage || isUploading}
-                  className="flex-1 py-3 bg-gradient-to-r from-[#00ffff] to-[#0ea5e9] text-[#0d1117] font-semibold rounded-xl hover:opacity-90 transition-smooth disabled:opacity-50 disabled:cursor-not-allowed glow-primary-sm"
-                >
-                  {isUploading ? "Uploading..." : "Publish"}
-                </motion.button>
-              </div>
+                  {/* Footer */}
+                  <div className="flex gap-3 p-6 border-t border-[#30363d]">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={onClose}
+                      className="flex-1 py-3 bg-[#0d1117] border border-[#30363d] text-[#ffffff] font-semibold rounded-xl hover:border-[#00ffff] hover:text-[#00ffff] transition-smooth"
+                    >
+                      Cancel
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handlePublishStory}
+                      disabled={!selectedImage || isUploading}
+                      className="flex-1 py-3 bg-gradient-to-r from-[#00ffff] to-[#0ea5e9] text-[#0d1117] font-semibold rounded-xl hover:opacity-90 transition-smooth disabled:opacity-50 disabled:cursor-not-allowed glow-primary-sm"
+                    >
+                      {isUploading ? "Uploading..." : "Publish"}
+                    </motion.button>
+                  </div>
+                </>
+              )}
             </motion.div>
           </motion.div>
         )}
