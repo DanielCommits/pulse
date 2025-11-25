@@ -1,10 +1,18 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { Home, MessageCircle, Bell, User, Search, Bookmark } from "lucide-react"
-import { useState } from "react"
+import { motion } from "framer-motion";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  Home,
+  MessageCircle,
+  Bell,
+  User,
+  Search,
+  Bookmark,
+} from "lucide-react";
+import { useState } from "react";
+import CreatePostModal from "@/components/create-post-modal";
 
 const navItems = [
   { icon: Home, label: "Home", href: "/home" },
@@ -13,11 +21,12 @@ const navItems = [
   { icon: Bell, label: "Notifications", href: "/notifications" },
   { icon: Bookmark, label: "Bookmarks", href: "/bookmarks" },
   { icon: User, label: "Profile", href: "/profile" },
-]
+];
 
 export default function Navbar() {
-  const pathname = usePathname()
-  const [hoveredItem, setHoveredItem] = useState<string | null>(null)
+  const pathname = usePathname();
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
 
   return (
     <>
@@ -26,8 +35,18 @@ export default function Navbar() {
         {/* Logo */}
         <Link href="/home" className="flex items-center gap-3 mb-8 px-3">
           <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-[#00ffff] to-[#0ea5e9] glow-primary-sm">
-            <svg className="w-5 h-5 text-[#0d1117]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            <svg
+              className="w-5 h-5 text-[#0d1117]"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 10V3L4 14h7v7l9-11h-7z"
+              />
             </svg>
           </div>
           <span className="text-xl font-bold text-[#ffffff]">Pulse</span>
@@ -36,8 +55,8 @@ export default function Navbar() {
         {/* Navigation Items */}
         <div className="flex-1 space-y-2">
           {navItems.map((item) => {
-            const Icon = item.icon
-            const isActive = pathname === item.href
+            const Icon = item.icon;
+            const isActive = pathname === item.href;
             return (
               <Link key={item.href} href={item.href}>
                 <motion.div
@@ -53,7 +72,7 @@ export default function Navbar() {
                   <span className="font-medium">{item.label}</span>
                 </motion.div>
               </Link>
-            )
+            );
           })}
         </div>
 
@@ -61,18 +80,23 @@ export default function Navbar() {
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
+          onClick={() => setIsCreatePostOpen(true)}
           className="w-full py-3 bg-gradient-to-r from-[#00ffff] to-[#0ea5e9] text-[#0d1117] font-semibold rounded-lg hover:opacity-90 transition-smooth glow-primary-sm"
         >
           New Post
         </motion.button>
+        <CreatePostModal
+          isOpen={isCreatePostOpen}
+          onClose={() => setIsCreatePostOpen(false)}
+        />
       </nav>
 
       {/* Mobile Bottom Navigation - Icon Only with Tooltip */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#161b22] border-t border-[#30363d] z-50">
         <div className="flex items-center justify-around px-2 py-3">
           {navItems.map((item) => {
-            const Icon = item.icon
-            const isActive = pathname === item.href
+            const Icon = item.icon;
+            const isActive = pathname === item.href;
             return (
               <div key={item.href} className="relative group">
                 <Link href={item.href}>
@@ -99,10 +123,10 @@ export default function Navbar() {
                   {item.label}
                 </motion.div>
               </div>
-            )
+            );
           })}
         </div>
       </nav>
     </>
-  )
+  );
 }

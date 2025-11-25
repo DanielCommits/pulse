@@ -1,9 +1,29 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { ArrowLeft, Bell, Lock, Palette, Volume2, Eye, Zap } from "lucide-react"
-import Link from "next/link"
+import { useState } from "react";
+import { motion } from "framer-motion";
+import {
+  ArrowLeft,
+  Bell,
+  Lock,
+  Palette,
+  Volume2,
+  Eye,
+  Zap,
+} from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAppStore } from "@/lib/store";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState({
@@ -12,11 +32,11 @@ export default function SettingsPage() {
     soundEnabled: true,
     privateAccount: false,
     emailNotifications: true,
-  })
+  });
 
   const handleToggle = (key: keyof typeof settings) => {
-    setSettings((prev) => ({ ...prev, [key]: !prev[key] }))
-  }
+    setSettings((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
 
   const settingItems = [
     {
@@ -49,7 +69,7 @@ export default function SettingsPage() {
       description: "Receive email updates about your account",
       key: "emailNotifications" as const,
     },
-  ]
+  ];
 
   return (
     <div className="min-h-screen pb-20 md:pb-0 bg-[#0d1117]">
@@ -71,7 +91,11 @@ export default function SettingsPage() {
 
       {/* Settings Content */}
       <div className="max-w-2xl mx-auto p-4 md:p-6">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-2">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-2"
+        >
           {/* General Settings Section */}
           <div className="mb-6">
             <h2 className="text-lg font-semibold text-[#ffffff] mb-4 flex items-center gap-2">
@@ -81,7 +105,7 @@ export default function SettingsPage() {
 
             <div className="space-y-2">
               {settingItems.map((item, index) => {
-                const Icon = item.icon
+                const Icon = item.icon;
                 return (
                   <motion.div
                     key={item.key}
@@ -96,8 +120,12 @@ export default function SettingsPage() {
                           <Icon className="w-5 h-5 text-[#00ffff]" />
                         </div>
                         <div>
-                          <h3 className="font-medium text-[#ffffff]">{item.label}</h3>
-                          <p className="text-sm text-[#8b949e]">{item.description}</p>
+                          <h3 className="font-medium text-[#ffffff]">
+                            {item.label}
+                          </h3>
+                          <p className="text-sm text-[#8b949e]">
+                            {item.description}
+                          </p>
                         </div>
                       </div>
 
@@ -106,7 +134,9 @@ export default function SettingsPage() {
                         whileTap={{ scale: 0.95 }}
                         onClick={() => handleToggle(item.key)}
                         className={`relative w-12 h-7 rounded-full transition-smooth ${
-                          settings[item.key] ? "bg-gradient-to-r from-[#00ffff] to-[#0ea5e9]" : "bg-[#30363d]"
+                          settings[item.key]
+                            ? "bg-gradient-to-r from-[#00ffff] to-[#0ea5e9]"
+                            : "bg-[#30363d]"
                         }`}
                       >
                         <motion.div
@@ -118,7 +148,7 @@ export default function SettingsPage() {
                       </motion.button>
                     </div>
                   </motion.div>
-                )
+                );
               })}
             </div>
           </div>
@@ -127,7 +157,8 @@ export default function SettingsPage() {
           <div className="bg-[#161b22] border border-[#30363d] rounded-xl p-6">
             <h3 className="font-semibold text-[#ffffff] mb-2">About Pulse</h3>
             <p className="text-sm text-[#8b949e] mb-4">
-              Pulse is a local social media app where you can share moments, connect with friends, and stay updated.
+              Pulse is a local social media app where you can share moments,
+              connect with friends, and stay updated.
             </p>
             <div className="space-y-2 text-sm text-[#8b949e]">
               <p>Version: 1.0.0</p>
@@ -136,15 +167,46 @@ export default function SettingsPage() {
           </div>
 
           {/* Logout Button */}
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="w-full py-3 bg-red-500/10 border border-red-500/30 text-red-400 font-semibold rounded-xl hover:bg-red-500/20 hover:border-red-500/50 transition-smooth mt-6"
-          >
-            Logout
-          </motion.button>
+          <LogoutButton />
         </motion.div>
       </div>
     </div>
-  )
+  );
+}
+
+function LogoutButton() {
+  const router = useRouter();
+  const logout = useAppStore((s) => s.logout);
+  const [open, setOpen] = useState(false);
+
+  const confirm = () => {
+    logout();
+    router.push("/login");
+  };
+
+  return (
+    <>
+      <motion.button
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        onClick={() => setOpen(true)}
+        className="w-full py-3 bg-red-500/10 border border-red-500/30 text-red-400 font-semibold rounded-xl hover:bg-red-500/20 hover:border-red-500/50 transition-smooth mt-6"
+      >
+        Logout
+      </motion.button>
+
+      <AlertDialog open={open} onOpenChange={setOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Log out</AlertDialogTitle>
+            <AlertDialogDescription>Are you sure you want to log out of your account?</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirm}>Log out</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
 }
