@@ -185,15 +185,19 @@ export default function StoryViewer({
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 1.05 }}
           transition={{ duration: 0.3 }}
-          className="relative w-full h-full md:max-w-md md:max-h-screen flex items-center justify-center"
+          className="relative w-full h-full flex items-center justify-center"
         >
+          {/*
+            Use object-contain and viewport-aware max dimensions so both
+            tall and wide images are fully visible without cropping.
+          */}
           <img
             src={
               currentStory.avatar ||
               "/placeholder.svg?height=800&width=450&query=story content"
             }
             alt="Story"
-            className="w-full h-full md:rounded-lg object-cover"
+            className="max-w-[calc(100vw-64px)] max-h-[calc(100vh-120px)] md:max-w-[calc(80vw-120px)] md:max-h-[calc(80vh-160px)] object-contain md:rounded-lg"
           />
 
           {/* Caption overlay */}
