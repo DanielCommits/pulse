@@ -26,6 +26,7 @@ export default function StoryViewer({
   const currentUser = useAppStore((state) => state.currentUser);
   const removeStory = useAppStore((state) => state.removeStory);
   const markStoryViewed = useAppStore((state) => state.markStoryViewed);
+  const [isTallImage, setIsTallImage] = useState(false);
 
   useEffect(() => {
     if (isPaused) return;
@@ -185,6 +186,7 @@ export default function StoryViewer({
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 1.05 }}
           transition={{ duration: 0.3 }}
+          // tall images are more centered on larger screens, not glued to top
           className="relative w-full h-full flex items-center justify-center"
         >
           {/*
@@ -197,7 +199,20 @@ export default function StoryViewer({
               "/placeholder.svg?height=800&width=450&query=story content"
             }
             alt="Story"
-            className="max-w-[calc(100vw-64px)] max-h-[calc(100vh-120px)] md:max-w-[calc(80vw-120px)] md:max-h-[calc(80vh-160px)] object-contain md:rounded-lg"
+            onLoad={(e) => {
+              const img = e.currentTarget as HTMLImageElement;
+              // consider image tall if its height is greater than its width
+              setIsTallImage(img.naturalHeight > img.naturalWidth);
+            }}
+            className={`object-contain md:rounded-lg
+              ${
+                // small screens: keep contained and centered
+                // larger screens: tall images use full height, others constrained
+                isTallImage
+                  ? "max-w-full max-h-[calc(100vh-120px)]"
+                  : "max-w-[calc(100vw-64px)] max-h-[calc(100vh-120px)] md:max-w-[calc(80vw-120px)] md:max-h-[calc(80vh-160px)]"
+              }
+            `}
           />
 
           {/* Caption overlay */}
