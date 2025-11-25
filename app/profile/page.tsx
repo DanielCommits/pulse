@@ -1,44 +1,80 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { Settings, MapPin, Calendar, LinkIcon, Users, Zap, ArrowLeft, Camera } from "lucide-react"
-import Link from "next/link"
-import { useAppStore } from "@/lib/store"
-import PostCard from "@/components/post-card"
-import EditProfileModal from "@/components/edit-profile-modal"
-import { mockPosts, mockStories } from "@/lib/mock-data"
+import { useState } from "react";
+import { motion } from "framer-motion";
+import {
+  Settings,
+  MapPin,
+  Calendar,
+  LinkIcon,
+  Users,
+  Zap,
+  ArrowLeft,
+  Camera,
+  LogOut,
+} from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAppStore } from "@/lib/store";
+import PostCard from "@/components/post-card";
+import EditProfileModal from "@/components/edit-profile-modal";
+import CreatePostModal from "@/components/create-post-modal";
 
 export default function ProfilePage() {
-  const currentUser = useAppStore((state) => state.currentUser)
-  const updateUserAvatar = useAppStore((state) => state.updateUserAvatar)
-  const [activeTab, setActiveTab] = useState<"posts" | "stories">("posts")
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
+  const currentUser = useAppStore((state) => state.currentUser);
+  const updateUserAvatar = useAppStore((state) => state.updateUserAvatar);
+  const logout = useAppStore((state) => state.logout);
+  const posts = useAppStore((state) => state.posts);
+  const userStories = useAppStore((state) => state.userStories);
+  const router = useRouter();
+  const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
+  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<"posts" | "stories">("posts");
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
   // Filter posts by current user
-  const userPosts = mockPosts.filter((post) => post.userId === currentUser?.id)
+  const userPosts = posts.filter((post) => post.userId === currentUser?.id);
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    setIsUploadingAvatar(true)
+    setIsUploadingAvatar(true);
 
     // Simulate file upload delay
-    await new Promise((resolve) => setTimeout(resolve, 500))
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     // Create a data URL for the image
-    const reader = new FileReader()
+    const reader = new FileReader();
     reader.onload = (event) => {
-      const imageUrl = event.target?.result as string
-      updateUserAvatar(imageUrl)
-      setIsUploadingAvatar(false)
-    }
-    reader.readAsDataURL(file)
-  }
+      const imageUrl = event.target?.result as string;
+      updateUserAvatar(imageUrl);
+      setIsUploadingAvatar(false);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleLogout = () => {
+    setIsLogoutDialogOpen(true);
+  };
+
+  const confirmLogout = () => {
+    logout();
+    router.push("/login");
+  };
 
   return (
     <div className="min-h-screen pb-20 md:pb-0">
@@ -57,15 +93,26 @@ export default function ProfilePage() {
             </Link>
             <h1 className="text-xl font-bold text-[#ffffff]">Profile</h1>
           </div>
-          <Link href="/settings">
+          <div className="flex items-center gap-2">
+            <Link href="/settings">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="p-2 text-[#8b949e] hover:text-[#00ffff] hover:bg-[#1c2128] rounded-lg transition-smooth"
+              >
+                <Settings className="w-5 h-5" />
+              </motion.button>
+            </Link>
+
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="p-2 text-[#8b949e] hover:text-[#00ffff] hover:bg-[#1c2128] rounded-lg transition-smooth"
+              onClick={handleLogout}
+              className="p-2 text-[#8b949e] hover:text-[#ff7b7b] hover:bg-[#1c2128] rounded-lg transition-smooth"
             >
-              <Settings className="w-5 h-5" />
+              <LogOut className="w-5 h-5" />
             </motion.button>
-          </Link>
+          </div>
         </div>
       </div>
 
@@ -122,12 +169,16 @@ export default function ProfilePage() {
 
             {/* Name and username */}
             <div className="mb-4">
-              <h2 className="text-2xl md:text-3xl font-bold text-[#ffffff] mb-1">{currentUser?.displayName}</h2>
+              <h2 className="text-2xl md:text-3xl font-bold text-[#ffffff] mb-1">
+                {currentUser?.displayName}
+              </h2>
               <p className="text-[#8b949e]">@{currentUser?.username}</p>
             </div>
 
             {/* Bio */}
-            <p className="text-[#ffffff] mb-4 leading-relaxed">{currentUser?.bio}</p>
+            <p className="text-[#ffffff] mb-4 leading-relaxed">
+              {currentUser?.bio}
+            </p>
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 gap-3 mb-4">
@@ -139,7 +190,9 @@ export default function ProfilePage() {
                   <Users className="w-4 h-4 text-[#00ffff]" />
                   <span className="text-sm text-[#8b949e]">Homies</span>
                 </div>
-                <p className="text-2xl font-bold text-[#ffffff]">{currentUser?.homies.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-[#ffffff]">
+                  {currentUser?.homies.toLocaleString()}
+                </p>
               </motion.div>
             </div>
 
@@ -189,7 +242,9 @@ export default function ProfilePage() {
           <button
             onClick={() => setActiveTab("posts")}
             className={`py-4 font-medium transition-smooth relative ${
-              activeTab === "posts" ? "text-[#00ffff]" : "text-[#8b949e] hover:text-[#ffffff]"
+              activeTab === "posts"
+                ? "text-[#00ffff]"
+                : "text-[#8b949e] hover:text-[#ffffff]"
             }`}
           >
             Posts
@@ -204,7 +259,9 @@ export default function ProfilePage() {
           <button
             onClick={() => setActiveTab("stories")}
             className={`py-4 font-medium transition-smooth relative ${
-              activeTab === "stories" ? "text-[#00ffff]" : "text-[#8b949e] hover:text-[#ffffff]"
+              activeTab === "stories"
+                ? "text-[#00ffff]"
+                : "text-[#8b949e] hover:text-[#ffffff]"
             }`}
           >
             Stories
@@ -239,11 +296,16 @@ export default function ProfilePage() {
                 <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#00ffff]/20 to-[#0ea5e9]/20 flex items-center justify-center">
                   <Zap className="w-10 h-10 text-[#00ffff]" />
                 </div>
-                <h3 className="text-xl font-semibold text-[#ffffff] mb-2">No posts yet</h3>
-                <p className="text-[#8b949e] mb-6">Share your first thought with the world</p>
+                <h3 className="text-xl font-semibold text-[#ffffff] mb-2">
+                  No posts yet
+                </h3>
+                <p className="text-[#8b949e] mb-6">
+                  Share your first thought with the world
+                </p>
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
+                  onClick={() => setIsCreatePostOpen(true)}
                   className="px-6 py-3 bg-gradient-to-r from-[#00ffff] to-[#0ea5e9] text-[#0d1117] font-semibold rounded-xl hover:opacity-90 transition-smooth glow-primary-sm"
                 >
                   Create your first post
@@ -254,29 +316,68 @@ export default function ProfilePage() {
         ) : (
           <div className="p-4">
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {mockStories.slice(0, 6).map((story, index) => (
-                <motion.button
-                  key={story.id}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.05 }}
-                  whileHover={{ scale: 1.05 }}
-                  className="aspect-[9/16] rounded-xl overflow-hidden border-2 border-[#30363d] hover:border-[#00ffff] transition-smooth relative group"
-                >
-                  <img
-                    src={story.avatar || "/placeholder.svg?height=400&width=225&query=story"}
-                    alt="Story"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0d1117]/80 to-transparent opacity-0 group-hover:opacity-100 transition-smooth" />
-                </motion.button>
-              ))}
+              {userStories.length > 0 ? (
+                userStories.map((story, index) => (
+                  <motion.button
+                    key={story.id}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: index * 0.05 }}
+                    whileHover={{ scale: 1.05 }}
+                    className="aspect-[9/16] rounded-xl overflow-hidden border-2 border-[#30363d] hover:border-[#00ffff] transition-smooth relative group"
+                  >
+                    <img
+                      src={
+                        story.avatar ||
+                        "/placeholder.svg?height=400&width=225&query=story"
+                      }
+                      alt="Story"
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0d1117]/80 to-transparent opacity-0 group-hover:opacity-100 transition-smooth" />
+                  </motion.button>
+                ))
+              ) : (
+                <div className="col-span-2 md:col-span-3 p-8 text-center border border-dashed border-[#30363d] rounded-xl">
+                  <p className="text-[#8b949e] mb-2">No stories yet</p>
+                  <p className="text-[#ffffff]">
+                    Share a moment — your stories will appear here
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         )}
       </div>
 
-      <EditProfileModal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} />
+      <CreatePostModal
+        isOpen={isCreatePostOpen}
+        onClose={() => setIsCreatePostOpen(false)}
+      />
+
+      <EditProfileModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+      />
+      <AlertDialog
+        open={isLogoutDialogOpen}
+        onOpenChange={setIsLogoutDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Log out</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to log out of your account?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmLogout}>
+              Log out
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
-  )
+  );
 }
