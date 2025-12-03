@@ -17,6 +17,7 @@ import {
 import { mockMessages, mockChatMessages } from "@/lib/mock-data";
 import { useAppStore } from "@/lib/store";
 import Link from "next/link";
+import VerifiedBadge from "@/components/VerifiedBadge"; // adjust path
 
 export default function MessagesPage() {
   const currentUser = useAppStore((state) => state.currentUser);
@@ -125,8 +126,9 @@ export default function MessagesPage() {
               </div>
               <div className="flex-1 text-left min-w-0">
                 <div className="flex items-center justify-between mb-1 gap-2">
-                  <h3 className="font-semibold text-sm md:text-base text-[#ffffff] truncate">
+                  <h3 className="font-semibold text-sm md:text-base text-[#ffffff] flex items-center gap-1 truncate">
                     {chat.displayName}
+                    {chat.verified && <VerifiedBadge size={16} />}
                   </h3>
                   <span className="text-xs text-[#6e7681] flex-shrink-0">
                     {chat.timestamp}
@@ -176,9 +178,11 @@ export default function MessagesPage() {
               )}
             </div>
             <div className="min-w-0">
-              <h2 className="font-semibold text-sm md:text-base text-[#ffffff] truncate">
+              <h2 className="font-semibold text-sm md:text-base text-[#ffffff] flex items-center gap-1 truncate">
                 {selectedChat.displayName}
+                {selectedChat.verified && <VerifiedBadge size={16} />}
               </h2>
+
               <p className="text-xs md:text-sm text-[#8b949e]">
                 {selectedChat.online ? "Active now" : "Offline"}
               </p>

@@ -53,6 +53,7 @@ export interface Message {
   timestamp: string;
   unread: number;
   online: boolean;
+  verified: boolean;
 }
 
 export interface Notification {
