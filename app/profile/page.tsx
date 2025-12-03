@@ -44,6 +44,7 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<"posts" | "stories">("posts");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [isAvatarPreviewOpen, setIsAvatarPreviewOpen] = useState(false);
 
   // Filter posts by current user
   const userPosts = posts.filter((post) => post.userId === currentUser?.id);
@@ -137,40 +138,52 @@ export default function ProfilePage() {
               transition={{ delay: 0.2 }}
               className="relative inline-block mb-4 group"
             >
+              {/* The clickable avatar */}
               <img
                 src={currentUser?.avatar || "/placeholder.svg"}
                 alt={currentUser?.displayName}
-                className="w-28 h-28 rounded-2xl border-4 border-[#161b22] object-cover glow-primary"
+                className="w-28 h-28 rounded-2xl border-4 border-[#161b22] object-cover glow-primary cursor-pointer"
+                onClick={() => setIsAvatarPreviewOpen(true)}
               />
 
-              <label className="absolute inset-0 flex items-center justify-center bg-[#0d1117]/70 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+              {/* Preview modal */}
+              {isAvatarPreviewOpen && (
+                <div
+                  className="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
+                  onClick={() => setIsAvatarPreviewOpen(false)}
+                >
+                  <img
+                    src={currentUser?.avatar || "/placeholder.svg"}
+                    className="max-w-[90%] max-h-[90%] rounded-xl"
+                    //onClick={(e) => e.stopPropagation()} // prevents modal from closing when clicking the image
+                  />
+                </div>
+              )}
+
+              {/* Upload button */}
+              <label className="absolute bottom-0 right-0 flex items-center justify-center w-12 h-12 bg-gradient-to-r from-[#00ffff] to-[#0ea5e9] rounded-full cursor-pointer">
                 <input
                   type="file"
                   accept="image/*"
                   onChange={handleAvatarChange}
-                  disabled={isUploadingAvatar}
                   className="hidden"
                 />
-                <motion.div
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-[#00ffff] to-[#0ea5e9] rounded-full"
-                >
-                  <Camera className="w-6 h-6 text-[#0d1117]" />
-                </motion.div>
+                <Camera className="w-6 h-6 text-[#0d1117]" />
               </label>
-
-              {currentUser?.verified && (
-                <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-gradient-to-br from-[#00ffff] to-[#0ea5e9] rounded-full flex items-center justify-center border-4 border-[#161b22]">
-                  <Zap className="w-5 h-5 text-[#0d1117]" fill="currentColor" />
-                </div>
-              )}
             </motion.div>
-
+            
             {/* Name and username */}
             <div className="mb-4">
-              <h2 className="text-2xl md:text-3xl font-bold text-[#ffffff] mb-1">
+              <h2 className="text-2xl md:text-3xl font-bold text-[#ffffff] flex items-center gap-2">
                 {currentUser?.displayName}
+                {currentUser?.verified && (
+                  <div className="w-6 h-6 bg-gradient-to-br from-[#00ffff] to-[#0ea5e9] rounded-full flex items-center justify-center border-2 border-[#161b22]">
+                    <Zap
+                      className="w-3.5 h-3.5 text-[#0d1117]"
+                      fill="currentColor"
+                    />
+                  </div>
+                )}
               </h2>
               <p className="text-[#8b949e]">@{currentUser?.username}</p>
             </div>
