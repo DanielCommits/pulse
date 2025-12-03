@@ -23,6 +23,7 @@ export default function EditProfileModal({
     bio: currentUser?.bio || "",
     location: currentUser?.location || "",
     website: currentUser?.website || "",
+    username: currentUser?.username || "",
   });
 
   const handleChange = (
@@ -35,11 +36,13 @@ export default function EditProfileModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     updateUserProfile(
+      formData.username,
       formData.displayName,
       formData.bio,
       formData.location,
       formData.website
     );
+
     onClose();
   };
 
@@ -86,6 +89,18 @@ export default function EditProfileModal({
                   type="text"
                   name="displayName"
                   value={formData.displayName}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 bg-[#0d1117] border border-[#30363d] rounded-lg text-[#ffffff] placeholder-[#6e7681] focus:outline-none focus:border-[#00ffff] focus:ring-1 focus:ring-[#00ffff] transition-smooth"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#ffffff] mb-2">
+                  Username
+                </label>
+                <input
+                  type="text"
+                  name="username"
+                  value={formData.username || ""}
                   onChange={handleChange}
                   className="w-full px-4 py-2 bg-[#0d1117] border border-[#30363d] rounded-lg text-[#ffffff] placeholder-[#6e7681] focus:outline-none focus:border-[#00ffff] focus:ring-1 focus:ring-[#00ffff] transition-smooth"
                 />
