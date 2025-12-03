@@ -46,6 +46,16 @@ export default function ProfilePage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [isAvatarPreviewOpen, setIsAvatarPreviewOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleShare = () => {
+    if (!currentUser?.username) return; // safety check
+    const profileUrl = `${window.location.origin}/profile/${currentUser.username}`;
+    navigator.clipboard.writeText(profileUrl).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000); // reset after 2s
+    });
+  };
 
   // Filter posts by current user
   const userPosts = posts.filter((post) => post.userId === currentUser?.id);
@@ -241,18 +251,33 @@ export default function ProfilePage() {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => setIsEditModalOpen(true)}
+                onClick={() => console.log("Edit modal open")}
                 className="flex-1 py-3 bg-gradient-to-r from-[#00ffff] to-[#0ea5e9] text-[#0d1117] font-semibold rounded-xl hover:opacity-90 transition-smooth glow-primary-sm"
               >
                 Edit Profile
               </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="px-6 py-3 bg-[#0d1117] border border-[#30363d] text-[#ffffff] font-semibold rounded-xl hover:border-[#00ffff] hover:text-[#00ffff] transition-smooth"
-              >
-                Share
-              </motion.button>
+
+              <div className="relative">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleShare}
+                  className="px-6 py-3 bg-[#0d1117] border border-[#30363d] text-[#ffffff] font-semibold rounded-xl hover:border-[#00ffff] hover:text-[#00ffff] transition-smooth"
+                >
+                  Share
+                </motion.button>
+
+                {copied && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: -20 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-[#00ffff] text-[#0d1117] px-3 py-1 rounded-lg text-sm font-medium shadow-lg"
+                  >
+                    Copied to clipboard!
+                  </motion.div>
+                )}
+              </div>
             </div>
           </div>
         </motion.div>
