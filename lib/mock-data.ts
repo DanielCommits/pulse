@@ -1,27 +1,27 @@
-import type { Post, Story, Message, Notification } from "./store"
+import type { Post, Story, Message, Notification } from "./store";
 
 // Added Comment interface
 export interface Comment {
-  id: string
-  postId: string
-  userId: string
-  username: string
-  displayName: string
-  avatar: string
-  content: string
-  timestamp: string
-  likes: number
-  liked: boolean
-  verified: boolean
-   parentId?: string
+  id: string;
+  postId: string;
+  userId: string;
+  username: string;
+  displayName: string;
+  avatar: string;
+  content: string;
+  timestamp: string;
+  likes: number;
+  liked: boolean;
+  verified: boolean;
+  parentId?: string;
 }
 
 export interface ChatMessage {
-  id: string
-  senderId: string
-  content: string
-  timestamp: string
-  isOwn: boolean
+  id: string;
+  senderId: string;
+  content: string;
+  timestamp: string;
+  isOwn: boolean;
 }
 
 export const mockPosts: Post[] = [
@@ -31,7 +31,8 @@ export const mockPosts: Post[] = [
     username: "sarahwilson",
     displayName: "Sarah Wilson",
     avatar: "/diverse-woman-avatar.png",
-    content: "Just launched my new portfolio! Check it out and let me know what you think 🚀✨",
+    content:
+      "Just launched my new portfolio! Check it out and let me know what you think 🚀✨",
     timestamp: "2h ago",
     likes: 234,
     comments: 45,
@@ -45,7 +46,8 @@ export const mockPosts: Post[] = [
     username: "mikejohnson",
     displayName: "Mike Johnson",
     avatar: "/man-avatar.png",
-    content: "The future of web development is here. AI-powered tools are changing everything we know about coding.",
+    content:
+      "The future of web development is here. AI-powered tools are changing everything we know about coding.",
     timestamp: "4h ago",
     likes: 567,
     comments: 89,
@@ -73,7 +75,8 @@ export const mockPosts: Post[] = [
     username: "davidlee",
     displayName: "David Lee",
     avatar: "/developer-avatar.png",
-    content: "Working on something exciting. Can't wait to share it with you all! Stay tuned 👀",
+    content:
+      "Working on something exciting. Can't wait to share it with you all! Stay tuned 👀",
     timestamp: "8h ago",
     likes: 445,
     comments: 67,
@@ -81,7 +84,7 @@ export const mockPosts: Post[] = [
     liked: false,
     verified: false,
   },
-]
+];
 
 export const mockStories: Story[] = [
   {
@@ -119,7 +122,7 @@ export const mockStories: Story[] = [
     avatar: "/diverse-designer-avatars.png",
     viewed: false,
   },
-]
+];
 
 export const mockMessages: Message[] = [
   {
@@ -132,6 +135,7 @@ export const mockMessages: Message[] = [
     timestamp: "5m ago",
     unread: 2,
     online: true,
+    verified: true,
   },
   {
     id: "2",
@@ -143,6 +147,7 @@ export const mockMessages: Message[] = [
     timestamp: "1h ago",
     unread: 0,
     online: false,
+    verified: false,
   },
   {
     id: "3",
@@ -154,8 +159,9 @@ export const mockMessages: Message[] = [
     timestamp: "3h ago",
     unread: 1,
     online: true,
+    verified: true,
   },
-]
+];
 
 export const mockNotifications: Notification[] = [
   {
@@ -202,7 +208,7 @@ export const mockNotifications: Notification[] = [
     timestamp: "4h ago",
     read: true,
   },
-]
+];
 
 export const mockComments: Comment[] = [
   {
@@ -238,7 +244,8 @@ export const mockComments: Comment[] = [
     username: "sarahwilson",
     displayName: "Sarah Wilson",
     avatar: "/diverse-woman-avatar.png",
-    content: "Couldn't agree more! AI is revolutionizing how we build software.",
+    content:
+      "Couldn't agree more! AI is revolutionizing how we build software.",
     timestamp: "3h ago",
     likes: 24,
     liked: false,
@@ -257,7 +264,7 @@ export const mockComments: Comment[] = [
     liked: true,
     verified: false,
   },
-]
+];
 
 export const mockTrendingUsers = [
   {
@@ -287,7 +294,7 @@ export const mockTrendingUsers = [
     following: 34500,
     verified: false,
   },
-]
+];
 
 export const mockChatMessages: Record<string, ChatMessage[]> = {
   "1": [
@@ -308,7 +315,8 @@ export const mockChatMessages: Record<string, ChatMessage[]> = {
     {
       id: "m3",
       senderId: "2",
-      content: "Thanks! I spent a lot of time on it. What do you think about the color scheme?",
+      content:
+        "Thanks! I spent a lot of time on it. What do you think about the color scheme?",
       timestamp: "10:33 AM",
       isOwn: false,
     },
@@ -352,4 +360,4 @@ export const mockChatMessages: Record<string, ChatMessage[]> = {
       isOwn: true,
     },
   ],
-}
+};
