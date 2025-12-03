@@ -80,6 +80,7 @@ interface AppState {
   addStory: (story: Story) => void;
   removeStory: (storyId: string) => void;
   updateUserProfile: (
+    username: string,
     displayName: string,
     bio: string,
     location: string,
@@ -134,13 +135,27 @@ export const useAppStore = create<AppState>((set) => ({
     set((state) => ({
       userStories: state.userStories.filter((s) => s.id !== storyId),
     })),
-  updateUserProfile: (displayName: string, bio: string, location: string, website: string) => {
+  updateUserProfile: (
+    username: string,
+    displayName: string,
+    bio: string,
+    location: string,
+    website: string
+  ) => {
     set((state) => ({
       currentUser: state.currentUser
-        ? { ...state.currentUser, displayName, bio, location, website }
+        ? {
+            ...state.currentUser,
+            username,
+            displayName,
+            bio,
+            location,
+            website,
+          }
         : null,
     }));
   },
+
   addPost: (post: Post) =>
     set((state) => ({
       posts: [post, ...state.posts], // Add new post to the top
