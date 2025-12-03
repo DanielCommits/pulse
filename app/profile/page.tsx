@@ -198,16 +198,28 @@ export default function ProfilePage() {
 
             {/* Additional Info */}
             <div className="flex flex-wrap items-center gap-4 text-sm text-[#8b949e] mb-6">
-              <div className="flex items-center gap-1">
-                <MapPin className="w-4 h-4" />
-                <span>San Francisco, CA</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <LinkIcon className="w-4 h-4" />
-                <a href="#" className="text-[#00ffff] hover:underline">
-                  alexchen.dev
-                </a>
-              </div>
+              {currentUser?.location && (
+                <div className="flex items-center gap-1">
+                  <MapPin className="w-4 h-4" />
+                  <span>{currentUser.location}</span>
+                </div>
+              )}
+              {currentUser?.website && (
+                <div className="flex items-center gap-1">
+                  <LinkIcon className="w-4 h-4" />
+                  <a
+                    href={
+                      currentUser.website.startsWith("http")
+                        ? currentUser.website
+                        : `https://${currentUser.website}`
+                    }
+                    className="text-[#00ffff] hover:underline"
+                    target="_blank"
+                  >
+                    {currentUser.website}
+                  </a>
+                </div>
+              )}
               <div className="flex items-center gap-1">
                 <Calendar className="w-4 h-4" />
                 <span>Joined March 2024</span>

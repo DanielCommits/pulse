@@ -1,37 +1,47 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { X } from "lucide-react"
-import { useAppStore } from "@/lib/store"
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { X } from "lucide-react";
+import { useAppStore } from "@/lib/store";
 
 interface EditProfileModalProps {
-  isOpen: boolean
-  onClose: () => void
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-export default function EditProfileModal({ isOpen, onClose }: EditProfileModalProps) {
-  const currentUser = useAppStore((state) => state.currentUser)
-  const updateUserProfile = useAppStore((state) => state.updateUserProfile)
+export default function EditProfileModal({
+  isOpen,
+  onClose,
+}: EditProfileModalProps) {
+  const currentUser = useAppStore((state) => state.currentUser);
+  const updateUserProfile = useAppStore((state) => state.updateUserProfile);
   const [formData, setFormData] = useState({
     displayName: currentUser?.displayName || "",
     bio: currentUser?.bio || "",
-    location: "San Francisco, CA",
-    website: "alexchen.dev",
-  })
+    location: currentUser?.location || "",
+    website: currentUser?.website || "",
+  });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    updateUserProfile(formData.displayName, formData.bio)
-    onClose()
-  }
+    e.preventDefault();
+    updateUserProfile(
+      formData.displayName,
+      formData.bio,
+      formData.location,
+      formData.website
+    );
+    onClose();
+  };
 
   return (
     <AnimatePresence>
@@ -69,7 +79,9 @@ export default function EditProfileModal({ isOpen, onClose }: EditProfileModalPr
             {/* Form */}
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-[#ffffff] mb-2">Display Name</label>
+                <label className="block text-sm font-medium text-[#ffffff] mb-2">
+                  Display Name
+                </label>
                 <input
                   type="text"
                   name="displayName"
@@ -80,7 +92,9 @@ export default function EditProfileModal({ isOpen, onClose }: EditProfileModalPr
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#ffffff] mb-2">Bio</label>
+                <label className="block text-sm font-medium text-[#ffffff] mb-2">
+                  Bio
+                </label>
                 <textarea
                   name="bio"
                   value={formData.bio}
@@ -91,7 +105,9 @@ export default function EditProfileModal({ isOpen, onClose }: EditProfileModalPr
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#ffffff] mb-2">Location</label>
+                <label className="block text-sm font-medium text-[#ffffff] mb-2">
+                  Location
+                </label>
                 <input
                   type="text"
                   name="location"
@@ -102,7 +118,9 @@ export default function EditProfileModal({ isOpen, onClose }: EditProfileModalPr
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[#ffffff] mb-2">Website</label>
+                <label className="block text-sm font-medium text-[#ffffff] mb-2">
+                  Website
+                </label>
                 <input
                   type="text"
                   name="website"
@@ -137,5 +155,5 @@ export default function EditProfileModal({ isOpen, onClose }: EditProfileModalPr
         </>
       )}
     </AnimatePresence>
-  )
+  );
 }

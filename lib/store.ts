@@ -10,6 +10,8 @@ export interface User {
   bio: string;
   homies: number;
   verified: boolean;
+  location: string;
+  website: string;
 }
 
 export interface Post {
@@ -77,7 +79,13 @@ interface AppState {
   updateUserAvatar: (avatarUrl: string) => void;
   addStory: (story: Story) => void;
   removeStory: (storyId: string) => void;
-  updateUserProfile: (displayName: string, bio: string) => void;
+  updateUserProfile: (
+    displayName: string,
+    bio: string,
+    location: string,
+    website: string
+  ) => void;
+
   addPost: (post: Post) => void; // Add this
   markStoryViewed: (storyId: string) => void;
 }
@@ -102,6 +110,8 @@ export const useAppStore = create<AppState>((set) => ({
       bio: "Designer & Developer | Building the future",
       homies: 1234,
       verified: true,
+      location: "San Francisco, CA",
+      website: "alexchen.dev",
     };
 
     set({ currentUser: mockUser, isAuthenticated: true });
@@ -124,10 +134,10 @@ export const useAppStore = create<AppState>((set) => ({
     set((state) => ({
       userStories: state.userStories.filter((s) => s.id !== storyId),
     })),
-  updateUserProfile: (displayName: string, bio: string) => {
+  updateUserProfile: (displayName: string, bio: string, location: string, website: string) => {
     set((state) => ({
       currentUser: state.currentUser
-        ? { ...state.currentUser, displayName, bio }
+        ? { ...state.currentUser, displayName, bio, location, website }
         : null,
     }));
   },
