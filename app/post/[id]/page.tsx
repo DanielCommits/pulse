@@ -15,6 +15,7 @@ import {
 import Link from "next/link";
 import { mockPosts, mockComments } from "@/lib/mock-data";
 import { useAppStore } from "@/lib/store";
+import VerifiedBadge from "components/VerifiedBadge";
 
 export default function PostThreadPage({ params }: { params: { id: string } }) {
   const { id } = params;
@@ -136,21 +137,15 @@ export default function PostThreadPage({ params }: { params: { id: string } }) {
               className="w-12 h-12 rounded-full border-2 border-[#30363d] object-cover"
             />
             <div>
-              <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-[#ffffff]">
-                  {post.displayName}
-                </h3>
-                {post.verified && (
-                  <svg
-                    className="w-5 h-5 text-[#00ffff]"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                )}
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-semibold text-[#ffffff] flex items-center gap-1">
+                    {post.displayName}
+                    {post.verified && <VerifiedBadge size={20} />}
+                  </h3>
+                  <p className="text-sm text-[#8b949e]">@{post.username}</p>
+                </div>
               </div>
-              <p className="text-sm text-[#8b949e]">@{post.username}</p>
             </div>
           </div>
           <button className="p-2 text-[#8b949e] hover:text-[#00ffff] hover:bg-[#1c2128] rounded-lg transition-smooth">
