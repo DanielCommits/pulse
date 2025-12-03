@@ -47,36 +47,52 @@ export default function PostCard({ post }: PostCardProps) {
         className="bg-[#161b22] border-b border-[#30363d] p-4 hover:bg-[#1c2128] transition-smooth cursor-pointer"
       >
         {/* Header */}
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center gap-3">
-            <img
-              src={post.avatar || "/placeholder.svg"}
-              alt={post.displayName}
-              className="w-10 h-10 rounded-full border-2 border-[#30363d] object-cover"
-            />
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-[#ffffff] flex items-center gap-1">
-                  {post.displayName}
-                  {post.verified && <VerifiedBadge size={16} />}
-                </h3>
-              </div>
+<div className="flex items-start justify-between mb-3">
+  <div className="flex items-center gap-3">
+    {/* Avatar */}
+    <Link
+      href={`/profile/${post.username}`}
+      onClick={(e) => e.stopPropagation()} // prevent outer post click
+    >
+      <img
+        src={post.avatar || "/placeholder.svg"}
+        alt={post.displayName}
+        className="w-10 h-10 rounded-full border-2 border-[#30363d] object-cover cursor-pointer"
+      />
+    </Link>
 
-              <p className="text-sm text-[#8b949e]">
-                @{post.username} · {post.timestamp}
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-            }}
-            className="p-2 text-[#8b949e] hover:text-[#00ffff] hover:bg-[#1c2128] rounded-lg transition-smooth"
-          >
-            <MoreHorizontal className="w-5 h-5" />
-          </button>
-        </div>
+    <div>
+      {/* Name and Verified Badge */}
+      <Link
+        href={`/profile/${post.username}`}
+        onClick={(e) => e.stopPropagation()} // prevent outer post click
+        className="flex items-center gap-1"
+      >
+        <h3 className="font-semibold text-[#ffffff] flex items-center gap-1 cursor-pointer">
+          {post.displayName}
+          {post.verified && <VerifiedBadge size={16} />}
+        </h3>
+      </Link>
+
+      {/* Username & timestamp */}
+      <p className="text-sm text-[#8b949e]">
+        @{post.username} · {post.timestamp}
+      </p>
+    </div>
+  </div>
+
+  {/* More button */}
+  <button
+    onClick={(e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    }}
+    className="p-2 text-[#8b949e] hover:text-[#00ffff] hover:bg-[#1c2128] rounded-lg transition-smooth"
+  >
+    <MoreHorizontal className="w-5 h-5" />
+  </button>
+</div>
+
 
         {/* Content */}
         <p className="text-[#ffffff] mb-4 leading-relaxed">{post.content}</p>
