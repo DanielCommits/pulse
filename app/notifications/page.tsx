@@ -1,38 +1,49 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { Heart, MessageCircle, UserPlus, AtSign, Settings, ArrowLeft } from "lucide-react"
-import Link from "next/link"
-import { mockNotifications } from "@/lib/mock-data"
+import { useState } from "react";
+import { motion } from "framer-motion";
+import {
+  Heart,
+  MessageCircle,
+  UserPlus,
+  AtSign,
+  Settings,
+  ArrowLeft,
+} from "lucide-react";
+import Link from "next/link";
+import { mockNotifications } from "@/lib/mock-data";
+import VerifiedBadge from "@/components/VerifiedBadge"; // adjust path
 
 const notificationIcons = {
   like: Heart,
   comment: MessageCircle,
   follow: UserPlus,
   mention: AtSign,
-}
+};
 
 const notificationColors = {
   like: "text-[#f85149]",
   comment: "text-[#00ffff]",
   follow: "text-[#8b5cf6]",
   mention: "text-[#d29922]",
-}
+};
 
 export default function NotificationsPage() {
-  const [filter, setFilter] = useState<"all" | "unread">("all")
-  const [notifications, setNotifications] = useState(mockNotifications)
+  const [filter, setFilter] = useState<"all" | "unread">("all");
+  const [notifications, setNotifications] = useState(mockNotifications);
 
-  const filteredNotifications = filter === "unread" ? notifications.filter((n) => !n.read) : notifications
+  const filteredNotifications =
+    filter === "unread" ? notifications.filter((n) => !n.read) : notifications;
 
   const markAsRead = (id: string) => {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)))
-  }
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+    );
+  };
 
   const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
-  }
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  };
 
   return (
     <div className="min-h-screen">
@@ -86,7 +97,10 @@ export default function NotificationsPage() {
             </button>
           </div>
           {notifications.some((n) => !n.read) && (
-            <button onClick={markAllAsRead} className="text-sm text-[#00ffff] hover:text-[#00e5e5] transition-smooth">
+            <button
+              onClick={markAllAsRead}
+              className="text-sm text-[#00ffff] hover:text-[#00e5e5] transition-smooth"
+            >
               Mark all as read
             </button>
           )}
@@ -97,8 +111,8 @@ export default function NotificationsPage() {
       <div className="divide-y divide-[#30363d]">
         {filteredNotifications.length > 0 ? (
           filteredNotifications.map((notification, index) => {
-            const Icon = notificationIcons[notification.type]
-            const iconColor = notificationColors[notification.type]
+            const Icon = notificationIcons[notification.type];
+            const iconColor = notificationColors[notification.type];
 
             return (
               <motion.button
@@ -121,13 +135,21 @@ export default function NotificationsPage() {
                 {/* Content */}
                 <div className="flex-1 text-left">
                   <div className="flex items-start gap-2 mb-1">
-                    <p className="text-[#ffffff] leading-relaxed">
-                      <span className="font-semibold">{notification.displayName}</span>{" "}
-                      <span className="text-[#8b949e]">{notification.content}</span>
+                    <p className="text-[#ffffff] leading-relaxed flex items-center gap-1">
+                      <span className="font-semibold flex items-center gap-1">
+                        {notification.displayName}
+                        {notification.verified && <VerifiedBadge size={16} />}
+                      </span>{" "}
+                      <span className="text-[#8b949e]">
+                        {notification.content}
+                      </span>
                     </p>
+
                     <Icon className={`w-5 h-5 flex-shrink-0 ${iconColor}`} />
                   </div>
-                  <p className="text-sm text-[#6e7681]">{notification.timestamp}</p>
+                  <p className="text-sm text-[#6e7681]">
+                    {notification.timestamp}
+                  </p>
                 </div>
 
                 {/* Unread indicator */}
@@ -135,18 +157,22 @@ export default function NotificationsPage() {
                   <div className="w-2 h-2 bg-[#00ffff] rounded-full flex-shrink-0 mt-2 glow-primary-sm" />
                 )}
               </motion.button>
-            )
+            );
           })
         ) : (
           <div className="p-12 text-center">
             <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#00ffff] to-[#0ea5e9] flex items-center justify-center glow-primary">
               <Heart className="w-10 h-10 text-[#0d1117]" />
             </div>
-            <h2 className="text-xl font-semibold text-[#ffffff] mb-2">No notifications</h2>
-            <p className="text-[#8b949e]">When you get notifications, they'll show up here</p>
+            <h2 className="text-xl font-semibold text-[#ffffff] mb-2">
+              No notifications
+            </h2>
+            <p className="text-[#8b949e]">
+              When you get notifications, they'll show up here
+            </p>
           </div>
         )}
       </div>
     </div>
-  )
+  );
 }

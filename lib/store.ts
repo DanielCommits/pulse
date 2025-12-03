@@ -66,6 +66,7 @@ export interface Notification {
   content: string;
   timestamp: string;
   read: boolean;
+  verified: boolean;
 }
 
 interface AppState {
