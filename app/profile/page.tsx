@@ -161,17 +161,20 @@ export default function ProfilePage() {
               )}
 
               {/* Upload button */}
-              <label className="absolute bottom-0 right-0 flex items-center justify-center w-12 h-12 bg-gradient-to-r from-[#00ffff] to-[#0ea5e9] rounded-full cursor-pointer">
+              <label
+                className="absolute bottom-0 right-0 flex items-center justify-center w-10 h-10 bg-gradient-to-r from-[#00ffff] to-[#0ea5e9] rounded-full cursor-pointer 
+                   transition-transform duration-200 hover:scale-110 active:scale-95"
+              >
                 <input
                   type="file"
                   accept="image/*"
                   onChange={handleAvatarChange}
                   className="hidden"
                 />
-                <Camera className="w-6 h-6 text-[#0d1117]" />
+                <Camera className="w-5 h-5 text-[#0d1117]" />
               </label>
             </motion.div>
-            
+
             {/* Name and username */}
             <div className="mb-4">
               <h2 className="text-2xl md:text-3xl font-bold text-[#ffffff] flex items-center gap-2">
