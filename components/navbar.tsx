@@ -26,20 +26,15 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 
-const navItems = [
-  { icon: Home, label: "Home", href: "/home" },
-  { icon: Search, label: "Search", href: "/search" },
-  { icon: MessageCircle, label: "Messages", href: "/messages" },
-  { icon: Bell, label: "Notifications", href: "/notifications" },
-  { icon: Bookmark, label: "Bookmarks", href: "/bookmarks" },
-  { icon: User, label: "Profile", href: "/profile" },
-];
+
 
 export default function Navbar() {
   const pathname = usePathname();
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
   const [open, setOpen] = useState(false);
+  const currentUser = useAppStore((state) => state.currentUser);
+
 
   const router = useRouter();
   const logout = useAppStore((s) => s.logout);
@@ -48,7 +43,19 @@ export default function Navbar() {
     logout();
     router.push("/login");
   };
-
+  
+const navItems = [
+  { icon: Home, label: "Home", href: "/home" },
+  { icon: Search, label: "Search", href: "/search" },
+  { icon: MessageCircle, label: "Messages", href: "/messages" },
+  { icon: Bell, label: "Notifications", href: "/notifications" },
+  { icon: Bookmark, label: "Bookmarks", href: "/bookmarks" },
+  {
+    icon: User,
+    label: "Profile",
+    href: currentUser ? `/profile/${currentUser.username}` : "/profile",
+  },
+];
   return (
     <>
       {/* Desktop Sidebar */}

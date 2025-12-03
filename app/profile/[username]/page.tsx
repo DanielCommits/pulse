@@ -33,6 +33,7 @@ import EditProfileModal from "@/components/edit-profile-modal";
 import CreatePostModal from "@/components/create-post-modal";
 import VerifiedBadge from "@/components/VerifiedBadge";
 
+
 export default function ProfilePage() {
   const currentUser = useAppStore((state) => state.currentUser);
   const updateUserAvatar = useAppStore((state) => state.updateUserAvatar);
@@ -47,7 +48,7 @@ export default function ProfilePage() {
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [isAvatarPreviewOpen, setIsAvatarPreviewOpen] = useState(false);
   const [copied, setCopied] = useState(false);
-
+ 
   const handleShare = () => {
     if (!currentUser?.username) return; // safety check
     const profileUrl = `${window.location.origin}/profile/${currentUser.username}`;
