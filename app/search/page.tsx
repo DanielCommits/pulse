@@ -1,25 +1,29 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { Search, ArrowLeft, Users } from "lucide-react"
-import Link from "next/link"
-import { mockTrendingUsers } from "@/lib/mock-data"
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { Search, ArrowLeft, Users } from "lucide-react";
+import Link from "next/link";
+import { mockTrendingUsers } from "@/lib/mock-data";
+import { useAppStore } from "@/lib/store";
+import VerifiedBadge from "@/components/VerifiedBadge";
 
 export default function SearchPage() {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [searchResults, setSearchResults] = useState<typeof mockTrendingUsers>([])
-  const [hasSearched, setHasSearched] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<typeof mockTrendingUsers>(
+    []
+  );
+  const [hasSearched, setHasSearched] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    setHasSearched(true)
+    e.preventDefault();
+    setHasSearched(true);
 
     if (!searchQuery.trim()) {
-      setSearchResults([])
-      return
+      setSearchResults([]);
+      return;
     }
 
     // Filter users based on search query
@@ -27,11 +31,11 @@ export default function SearchPage() {
       (user) =>
         user.displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.bio.toLowerCase().includes(searchQuery.toLowerCase()),
-    )
+        user.bio.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
-    setSearchResults(results)
-  }
+    setSearchResults(results);
+  };
 
   return (
     <div className="min-h-screen pb-20 md:pb-0">
@@ -98,17 +102,21 @@ export default function SearchPage() {
                         />
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold text-[#ffffff]">{user.displayName}</h3>
-                            {user.verified && (
-                              <svg className="w-4 h-4 text-[#00ffff]" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              </svg>
-                            )}
+                            <h3 className="font-semibold text-[#ffffff] flex items-center gap-1">
+                              {user.displayName}
+                              {user.verified && <VerifiedBadge size={16} />}
+                            </h3>
                           </div>
-                          <p className="text-sm text-[#8b949e] mb-2">@{user.username}</p>
-                          <p className="text-[#ffffff] text-sm mb-2">{user.bio}</p>
+                          <p className="text-sm text-[#8b949e] mb-2">
+                            @{user.username}
+                          </p>
+                          <p className="text-[#ffffff] text-sm mb-2">
+                            {user.bio}
+                          </p>
                           <div className="flex items-center gap-4 text-sm text-[#8b949e]">
-                            <span>{user.following.toLocaleString()} following</span>
+                            <span>
+                              {user.following.toLocaleString()} following
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -128,8 +136,12 @@ export default function SearchPage() {
                 <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#00ffff]/20 to-[#0ea5e9]/20 flex items-center justify-center">
                   <Users className="w-10 h-10 text-[#00ffff]" />
                 </div>
-                <h3 className="text-xl font-semibold text-[#ffffff] mb-2">No users found</h3>
-                <p className="text-[#8b949e]">Try searching for a different username or name</p>
+                <h3 className="text-xl font-semibold text-[#ffffff] mb-2">
+                  No users found
+                </h3>
+                <p className="text-[#8b949e]">
+                  Try searching for a different username or name
+                </p>
               </div>
             )
           ) : (
@@ -137,12 +149,14 @@ export default function SearchPage() {
               <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#00ffff]/20 to-[#0ea5e9]/20 flex items-center justify-center">
                 <Search className="w-10 h-10 text-[#00ffff]" />
               </div>
-              <h3 className="text-xl font-semibold text-[#ffffff] mb-2">Search for users</h3>
+              <h3 className="text-xl font-semibold text-[#ffffff] mb-2">
+                Search for users
+              </h3>
               <p className="text-[#8b949e]">Find and follow people on Pulse</p>
             </div>
           )}
         </div>
       </div>
     </div>
-  )
+  );
 }

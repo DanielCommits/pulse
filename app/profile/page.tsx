@@ -31,6 +31,7 @@ import { useAppStore } from "@/lib/store";
 import PostCard from "@/components/post-card";
 import EditProfileModal from "@/components/edit-profile-modal";
 import CreatePostModal from "@/components/create-post-modal";
+import VerifiedBadge from "@/components/VerifiedBadge";
 
 export default function ProfilePage() {
   const currentUser = useAppStore((state) => state.currentUser);
@@ -179,14 +180,7 @@ export default function ProfilePage() {
             <div className="mb-4">
               <h2 className="text-2xl md:text-3xl font-bold text-[#ffffff] flex items-center gap-2">
                 {currentUser?.displayName}
-                {currentUser?.verified && (
-                  <div className="w-6 h-6 bg-gradient-to-br from-[#00ffff] to-[#0ea5e9] rounded-full flex items-center justify-center border-2 border-[#161b22]">
-                    <Zap
-                      className="w-3.5 h-3.5 text-[#0d1117]"
-                      fill="currentColor"
-                    />
-                  </div>
-                )}
+                {currentUser?.verified && <VerifiedBadge size={24} />}
               </h2>
               <p className="text-[#8b949e]">@{currentUser?.username}</p>
             </div>
