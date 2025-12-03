@@ -13,6 +13,18 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import CreatePostModal from "@/components/create-post-modal";
+import { useRouter } from "next/navigation";
+import { useAppStore } from "@/lib/store";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 
 const navItems = [
   { icon: Home, label: "Home", href: "/home" },
@@ -27,6 +39,15 @@ export default function Navbar() {
   const pathname = usePathname();
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  const router = useRouter();
+  const logout = useAppStore((s) => s.logout);
+
+  const confirm = () => {
+    logout();
+    router.push("/login");
+  };
 
   return (
     <>
@@ -75,6 +96,31 @@ export default function Navbar() {
             );
           })}
         </div>
+
+        {/* Logout Button */}
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => setOpen(true)}
+          className="w-full py-3 bg-red-500/10 border border-red-500/30 text-red-400 font-semibold rounded-xl hover:bg-red-500/20 hover:border-red-500/50 transition-smooth mb-4"
+        >
+          Logout
+        </motion.button>
+
+        <AlertDialog open={open} onOpenChange={setOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Log out</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to log out of your account?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={confirm}>Log out</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         {/* New Post Button */}
         <motion.button
