@@ -271,26 +271,21 @@ export default function PostThreadPage({ params }: { params: { id: string } }) {
                     className="w-10 h-10 rounded-full border-2 border-[#30363d] object-cover"
                   />
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-semibold text-[#ffffff]">
-                        {c.displayName}
-                      </h4>
-                      {c.verified && (
-                        <svg
-                          className="w-4 h-4 text-[#00ffff]"
-                          fill="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      )}
-                      <span className="text-sm text-[#8b949e]">
-                        @{c.username}
-                      </span>
-                      <span className="text-sm text-[#6e7681]">
-                        · {c.timestamp}
-                      </span>
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-1 mb-1">
+                        <h4 className="font-semibold text-[#ffffff] flex items-center gap-1">
+                          {c.displayName}
+                          {c.verified && <VerifiedBadge size={16} />}
+                        </h4>
+                        <span className="text-sm text-[#8b949e]">
+                          @{c.username}
+                        </span>
+                        <span className="text-sm text-[#6e7681]">
+                          · {c.timestamp}
+                        </span>
+                      </div>
                     </div>
+
                     <p className="text-[#ffffff] mb-2">{c.content}</p>
                     <div className="flex items-center gap-4">
                       <motion.button
@@ -369,19 +364,11 @@ export default function PostThreadPage({ params }: { params: { id: string } }) {
                           className="w-8 h-8 rounded-full border-2 border-[#30363d] object-cover"
                         />
                         <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-semibold text-[#ffffff] text-sm">
+                          <div className="flex items-center gap-1 mb-1">
+                            <h4 className="font-semibold text-[#ffffff] text-sm flex items-center gap-1">
                               {reply.displayName}
+                              {reply.verified && <VerifiedBadge size={14} />}
                             </h4>
-                            {reply.verified && (
-                              <svg
-                                className="w-3 h-3 text-[#00ffff]"
-                                fill="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              </svg>
-                            )}
                             <span className="text-xs text-[#8b949e]">
                               @{reply.username}
                             </span>
@@ -389,6 +376,7 @@ export default function PostThreadPage({ params }: { params: { id: string } }) {
                               · {reply.timestamp}
                             </span>
                           </div>
+
                           <p className="text-[#ffffff] text-sm mb-2">
                             {reply.content}
                           </p>

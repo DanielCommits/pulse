@@ -1,36 +1,43 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { motion } from "framer-motion"
-import { Heart, MessageCircle, Repeat2, Bookmark, MoreHorizontal } from "lucide-react"
-import type { Post } from "@/lib/store"
-import { useState } from "react"
-import Link from "next/link"
+import { motion } from "framer-motion";
+import {
+  Heart,
+  MessageCircle,
+  Repeat2,
+  Bookmark,
+  MoreHorizontal,
+} from "lucide-react";
+import type { Post } from "@/lib/store";
+import { useState } from "react";
+import Link from "next/link";
+import VerifiedBadge from "./VerifiedBadge";
 
 interface PostCardProps {
-  post: Post
+  post: Post;
 }
 
 export default function PostCard({ post }: PostCardProps) {
-  const [liked, setLiked] = useState(post.liked)
-  const [likes, setLikes] = useState(post.likes)
-  const [reposted, setReposted] = useState(false)
-  const [reposts, setReposts] = useState(post.shares)
+  const [liked, setLiked] = useState(post.liked);
+  const [likes, setLikes] = useState(post.likes);
+  const [reposted, setReposted] = useState(false);
+  const [reposts, setReposts] = useState(post.shares);
 
   const handleLike = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setLiked(!liked)
-    setLikes(liked ? likes - 1 : likes + 1)
-  }
+    e.preventDefault();
+    e.stopPropagation();
+    setLiked(!liked);
+    setLikes(liked ? likes - 1 : likes + 1);
+  };
 
   const handleRepost = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setReposted(!reposted)
-    setReposts(reposted ? reposts - 1 : reposts + 1)
-  }
+    e.preventDefault();
+    e.stopPropagation();
+    setReposted(!reposted);
+    setReposts(reposted ? reposts - 1 : reposts + 1);
+  };
 
   return (
     <Link href={`/post/${post.id}`}>
@@ -49,13 +56,12 @@ export default function PostCard({ post }: PostCardProps) {
             />
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-[#ffffff]">{post.displayName}</h3>
-                {post.verified && (
-                  <svg className="w-4 h-4 text-[#00ffff]" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                )}
+                <h3 className="font-semibold text-[#ffffff] flex items-center gap-1">
+                  {post.displayName}
+                  {post.verified && <VerifiedBadge size={16} />}
+                </h3>
               </div>
+
               <p className="text-sm text-[#8b949e]">
                 @{post.username} · {post.timestamp}
               </p>
@@ -63,8 +69,8 @@ export default function PostCard({ post }: PostCardProps) {
           </div>
           <button
             onClick={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
+              e.preventDefault();
+              e.stopPropagation();
             }}
             className="p-2 text-[#8b949e] hover:text-[#00ffff] hover:bg-[#1c2128] rounded-lg transition-smooth"
           >
@@ -84,12 +90,18 @@ export default function PostCard({ post }: PostCardProps) {
                 className="w-full h-auto max-h-96 object-cover"
               />
             ) : (
-              <video src={post.media.url} className="w-full h-auto max-h-96 object-cover" controls />
+              <video
+                src={post.media.url}
+                className="w-full h-auto max-h-96 object-cover"
+                controls
+              />
             )}
           </div>
         )}
 
-        {post.caption && <p className="text-[#8b949e] text-sm mb-4 italic">{post.caption}</p>}
+        {post.caption && (
+          <p className="text-[#8b949e] text-sm mb-4 italic">{post.caption}</p>
+        )}
 
         {/* Actions */}
         <div className="flex items-center justify-between">
@@ -100,7 +112,11 @@ export default function PostCard({ post }: PostCardProps) {
               onClick={handleLike}
               className="flex items-center gap-2 text-[#8b949e] hover:text-[#00ffff] transition-smooth group"
             >
-              <Heart className={`w-5 h-5 ${liked ? "fill-[#00ffff] text-[#00ffff]" : ""}`} />
+              <Heart
+                className={`w-5 h-5 ${
+                  liked ? "fill-[#00ffff] text-[#00ffff]" : ""
+                }`}
+              />
               <span className="text-sm">{likes}</span>
             </motion.button>
 
@@ -108,8 +124,8 @@ export default function PostCard({ post }: PostCardProps) {
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
+                e.preventDefault();
+                e.stopPropagation();
               }}
               className="flex items-center gap-2 text-[#8b949e] hover:text-[#00ffff] transition-smooth"
             >
@@ -121,10 +137,14 @@ export default function PostCard({ post }: PostCardProps) {
               whileTap={{ scale: 0.9 }}
               onClick={handleRepost}
               className={`flex items-center gap-2 transition-smooth ${
-                reposted ? "text-[#00ffff]" : "text-[#8b949e] hover:text-[#00ffff]"
+                reposted
+                  ? "text-[#00ffff]"
+                  : "text-[#8b949e] hover:text-[#00ffff]"
               }`}
             >
-              <Repeat2 className={`w-5 h-5 ${reposted ? "fill-[#00ffff]" : ""}`} />
+              <Repeat2
+                className={`w-5 h-5 ${reposted ? "fill-[#00ffff]" : ""}`}
+              />
               <span className="text-sm">{reposts}</span>
             </motion.button>
           </div>
@@ -133,8 +153,8 @@ export default function PostCard({ post }: PostCardProps) {
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
+              e.preventDefault();
+              e.stopPropagation();
             }}
             className="text-[#8b949e] hover:text-[#00ffff] transition-smooth"
           >
@@ -143,5 +163,5 @@ export default function PostCard({ post }: PostCardProps) {
         </div>
       </motion.article>
     </Link>
-  )
+  );
 }

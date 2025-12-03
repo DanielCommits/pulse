@@ -1,35 +1,44 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { ArrowLeft, Heart, Send } from "lucide-react"
-import Link from "next/link"
-import { mockComments, mockPosts } from "@/lib/mock-data"
-import { useAppStore } from "@/lib/store"
+import type React from "react";
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { ArrowLeft, Heart, Send } from "lucide-react";
+import Link from "next/link";
+import { mockComments, mockPosts } from "@/lib/mock-data";
+import { useAppStore } from "@/lib/store";
+import VerifiedBadge from "@/components/VerifiedBadge";
 
-export default function ReplyThreadPage({ params }: { params: { commentId: string } }) {
-  const { commentId } = params
-  const currentUser = useAppStore((state) => state.currentUser)
-  const parentComment = mockComments.find((c) => c.id === commentId)
-  const parentPost = parentComment ? mockPosts.find((p) => p.id === parentComment.postId) : null
+export default function ReplyThreadPage({
+  params,
+}: {
+  params: { commentId: string };
+}) {
+  const { commentId } = params;
+  const currentUser = useAppStore((state) => state.currentUser);
+  const parentComment = mockComments.find((c) => c.id === commentId);
+  const parentPost = parentComment
+    ? mockPosts.find((p) => p.id === parentComment.postId)
+    : null;
 
-  const [reply, setReply] = useState("")
+  const [reply, setReply] = useState("");
   const [replies, setReplies] = useState<typeof mockComments>([
-    ...mockComments.filter((c) => c.id !== commentId && c.postId === parentComment?.postId),
-  ])
+    ...mockComments.filter(
+      (c) => c.id !== commentId && c.postId === parentComment?.postId
+    ),
+  ]);
 
   if (!parentComment || !parentPost) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-[#8b949e]">Comment not found</p>
       </div>
-    )
+    );
   }
 
   const handleReplySubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!reply.trim() || !currentUser) return
+    e.preventDefault();
+    if (!reply.trim() || !currentUser) return;
 
     const newReply = {
       id: `c${Date.now()}`,
@@ -43,11 +52,11 @@ export default function ReplyThreadPage({ params }: { params: { commentId: strin
       likes: 0,
       liked: false,
       verified: currentUser.verified,
-    }
+    };
 
-    setReplies([...replies, newReply])
-    setReply("")
-  }
+    setReplies([...replies, newReply]);
+    setReply("");
+  };
 
   return (
     <div className="min-h-screen pb-20 md:pb-0">
@@ -80,23 +89,30 @@ export default function ReplyThreadPage({ params }: { params: { commentId: strin
             className="w-12 h-12 rounded-full border-2 border-[#30363d] object-cover"
           />
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <h3 className="font-semibold text-[#ffffff]">{parentComment.displayName}</h3>
-              {parentComment.verified && (
-                <svg className="w-5 h-5 text-[#00ffff]" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              )}
-              <span className="text-sm text-[#8b949e]">@{parentComment.username}</span>
+            <div className="flex items-center gap-1 mb-1">
+              <h3 className="font-semibold text-[#ffffff] flex items-center gap-1">
+                {parentComment.displayName}
+                {parentComment.verified && <VerifiedBadge size={16} />}
+              </h3>
+              <span className="text-sm text-[#8b949e]">
+                @{parentComment.username}
+              </span>
             </div>
+
             <p className="text-[#ffffff] mb-3">{parentComment.content}</p>
-            <p className="text-sm text-[#8b949e] mb-4">{parentComment.timestamp}</p>
+            <p className="text-sm text-[#8b949e] mb-4">
+              {parentComment.timestamp}
+            </p>
             <div className="flex items-center gap-4">
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 className="flex items-center gap-1 text-[#8b949e] hover:text-[#00ffff] transition-smooth text-sm"
               >
-                <Heart className={`w-4 h-4 ${parentComment.liked ? "fill-[#00ffff] text-[#00ffff]" : ""}`} />
+                <Heart
+                  className={`w-4 h-4 ${
+                    parentComment.liked ? "fill-[#00ffff] text-[#00ffff]" : ""
+                  }`}
+                />
                 <span>{parentComment.likes}</span>
               </motion.button>
             </div>
@@ -150,23 +166,28 @@ export default function ReplyThreadPage({ params }: { params: { commentId: strin
                 className="w-10 h-10 rounded-full border-2 border-[#30363d] object-cover"
               />
               <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <h4 className="font-semibold text-[#ffffff]">{r.displayName}</h4>
-                  {r.verified && (
-                    <svg className="w-4 h-4 text-[#00ffff]" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  )}
+                <div className="flex items-center gap-1 mb-1">
+                  <h4 className="font-semibold text-[#ffffff] flex items-center gap-1">
+                    {r.displayName}
+                    {r.verified && <VerifiedBadge size={14} />}
+                  </h4>
                   <span className="text-sm text-[#8b949e]">@{r.username}</span>
-                  <span className="text-sm text-[#6e7681]">· {r.timestamp}</span>
+                  <span className="text-sm text-[#6e7681]">
+                    · {r.timestamp}
+                  </span>
                 </div>
+
                 <p className="text-[#ffffff] mb-2">{r.content}</p>
                 <div className="flex items-center gap-4">
                   <motion.button
                     whileTap={{ scale: 0.9 }}
                     className="flex items-center gap-1 text-[#8b949e] hover:text-[#00ffff] transition-smooth text-sm"
                   >
-                    <Heart className={`w-4 h-4 ${r.liked ? "fill-[#00ffff] text-[#00ffff]" : ""}`} />
+                    <Heart
+                      className={`w-4 h-4 ${
+                        r.liked ? "fill-[#00ffff] text-[#00ffff]" : ""
+                      }`}
+                    />
                     <span>{r.likes}</span>
                   </motion.button>
                 </div>
@@ -176,5 +197,5 @@ export default function ReplyThreadPage({ params }: { params: { commentId: strin
         ))}
       </div>
     </div>
-  )
+  );
 }
