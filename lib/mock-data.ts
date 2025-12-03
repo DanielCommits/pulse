@@ -174,6 +174,7 @@ export const mockNotifications: Notification[] = [
     content: "liked your post",
     timestamp: "5m ago",
     read: false,
+    verified: true,
   },
   {
     id: "2",
@@ -185,6 +186,7 @@ export const mockNotifications: Notification[] = [
     content: "started following you",
     timestamp: "1h ago",
     read: false,
+    verified: false,
   },
   {
     id: "3",
@@ -196,6 +198,7 @@ export const mockNotifications: Notification[] = [
     content: "commented on your post",
     timestamp: "2h ago",
     read: true,
+    verified: true,
   },
   {
     id: "4",
@@ -207,6 +210,7 @@ export const mockNotifications: Notification[] = [
     content: "mentioned you in a post",
     timestamp: "4h ago",
     read: true,
+    verified: false,
   },
 ];
 
