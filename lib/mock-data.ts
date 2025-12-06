@@ -32,7 +32,7 @@ export const mockPosts: Post[] = [
     displayName: "Sarah Wilson",
     avatar: "/diverse-woman-avatar.png",
     content:
-      "Just launched my new portfolio! Check it out and let me know what you think 🚀✨",
+      "Just divorced my husband. Feeling liberated and excited for this new chapter in my life! #FreshStart #NewBeginnings",
     timestamp: "2h ago",
     likes: 234,
     comments: 45,
@@ -47,7 +47,7 @@ export const mockPosts: Post[] = [
     displayName: "Mike Johnson",
     avatar: "/man-avatar.png",
     content:
-      "The future of web development is here. AI-powered tools are changing everything we know about coding.",
+      "I need some money!!",
     timestamp: "4h ago",
     likes: 567,
     comments: 89,
@@ -61,7 +61,7 @@ export const mockPosts: Post[] = [
     username: "emilydavis",
     displayName: "Emily Davis",
     avatar: "/woman-profile.png",
-    content: "Coffee + Code = Perfect Morning ☕💻",
+    content: "Cristiano Ronaldo is the GOAT! 🐐⚽️",
     timestamp: "6h ago",
     likes: 892,
     comments: 123,
