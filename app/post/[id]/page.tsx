@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
+import { useState, use } from "react"; // Added 'use' import
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
@@ -17,12 +17,19 @@ import { mockPosts, mockComments } from "@/lib/mock-data";
 import { useAppStore } from "@/lib/store";
 import VerifiedBadge from "components/VerifiedBadge";
 
-export default function PostThreadPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+// Changed params type to Promise
+export default function PostThreadPage({ params }: { params: Promise<{ id: string }> }) {
+  // Unwrap params using React.use()
+  const { id } = use(params);
+  
   const posts = useAppStore((state) => state.posts);
-  const currentUser = useAppStore((state) => state.currentUser); // <-- Add this line
+  const currentUser = useAppStore((state) => state.currentUser);
+  
   // Search in both store and mockPosts
-  const post = [...posts, ...mockPosts].find((p) => p.id === id);
+  const post = [...posts, ...mockPosts].find(
+    (p) => String(p.id) === String(id)
+  );
+
   const postComments = mockComments.filter((c) => c.postId === id);
 
   const [liked, setLiked] = useState(post?.liked || false);
