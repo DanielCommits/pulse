@@ -41,6 +41,7 @@ export interface Story {
   avatar: string;
   viewed: boolean;
   caption?: string;
+  verified: boolean;
 }
 
 export interface Message {

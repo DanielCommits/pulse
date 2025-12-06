@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronLeft, ChevronRight, Pause, Play, Trash } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import type { Story } from "@/lib/store";
+import VerifiedBadge from "./VerifiedBadge";
 
 interface StoryViewerProps {
   stories: Story[];
@@ -137,9 +138,14 @@ export default function StoryViewer({
             className="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-[#00ffff] object-cover"
           />
           <div className="min-w-0">
-            <h3 className="font-semibold text-[#ffffff] text-sm md:text-base truncate">
-              {currentStory.username}
-            </h3>
+            <div className="flex items-center gap-1">
+              <h3 className="font-semibold text-[#ffffff] text-sm md:text-base truncate">
+                {currentStory.username}
+              </h3>
+
+              {currentStory.verified && <VerifiedBadge size={17} />}
+            </div>
+
             <p className="text-xs text-[#8b949e]">5h ago</p>
           </div>
         </div>
