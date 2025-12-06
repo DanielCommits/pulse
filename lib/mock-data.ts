@@ -93,6 +93,7 @@ export const mockStories: Story[] = [
     username: "sarahwilson",
     avatar: "/diverse-woman-avatar.png",
     viewed: false,
+    verified: true,
   },
   {
     id: "2",
@@ -100,6 +101,7 @@ export const mockStories: Story[] = [
     username: "mikejohnson",
     avatar: "/man-avatar.png",
     viewed: false,
+    verified: false,
   },
   {
     id: "3",
@@ -107,6 +109,7 @@ export const mockStories: Story[] = [
     username: "emilydavis",
     avatar: "/woman-profile.png",
     viewed: true,
+    verified: true,
   },
   {
     id: "4",
@@ -114,6 +117,7 @@ export const mockStories: Story[] = [
     username: "davidlee",
     avatar: "/developer-avatar.png",
     viewed: false,
+    verified: false,
   },
   {
     id: "5",
@@ -121,6 +125,7 @@ export const mockStories: Story[] = [
     username: "jessicapark",
     avatar: "/diverse-designer-avatars.png",
     viewed: false,
+    verified: true,
   },
 ];
 
