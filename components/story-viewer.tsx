@@ -143,7 +143,9 @@ export default function StoryViewer({
                 {currentStory.username}
               </h3>
 
-              {currentStory.verified && <VerifiedBadge size={17} />}
+              {(currentStory.username === currentUser?.username
+                ? currentUser.verified
+                : currentStory.verified) && <VerifiedBadge size={17} />}
             </div>
 
             <p className="text-xs text-[#8b949e]">5h ago</p>

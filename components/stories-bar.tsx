@@ -8,6 +8,7 @@ import { useAppStore } from "@/lib/store";
 import StoryViewer from "./story-viewer";
 import CreateStoryModal from "./create-story-modal";
 import { useRouter } from "next/navigation"; // Add this for navigation
+import VerifiedBadge from "./VerifiedBadge";
 
 export default function StoriesBar() {
   const router = useRouter(); // ✅ router for navigation
@@ -89,9 +90,14 @@ export default function StoriesBar() {
                   className="w-14 h-14 md:w-16 md:h-16 rounded-full border-2 border-[#161b22] object-cover"
                 />
               </div>
-              <span className="text-xs text-[#8b949e] group-hover:text-[#ffffff] transition-smooth max-w-[56px] md:max-w-[64px] truncate">
-                Me
-              </span>
+              <div className="flex items-center gap-1">
+                <span className="text-xs text-[#8b949e] group-hover:text-white transition-smooth max-w-[56px] md:max-w-[64px] truncate">
+                  Me
+                </span>
+
+                {/* Use the real user */}
+                {currentUser?.verified && <VerifiedBadge size={14} />}
+              </div>
             </motion.button>
           )}
 
@@ -117,9 +123,13 @@ export default function StoriesBar() {
                   className="w-14 h-14 md:w-16 md:h-16 rounded-full border-2 border-[#161b22] object-cover"
                 />
               </div>
-              <span className="text-xs text-[#8b949e] group-hover:text-[#ffffff] transition-smooth max-w-[56px] md:max-w-[64px] truncate">
-                {story.username}
-              </span>
+              <div className="flex items-center gap-1">
+                <span className="text-xs text-[#8b949e] group-hover:text-white transition-smooth max-w-[56px] md:max-w-[64px] truncate">
+                  {story.username}
+                </span>
+
+                {story.verified && <VerifiedBadge size={14} />}
+              </div>
             </motion.button>
           ))}
         </div>
