@@ -115,7 +115,7 @@ export const useAppStore = create<AppState>((set) => ({
       homies: 1234,
       verified: true,
       location: "San Francisco, CA",
-      website: "alexchen.dev",
+      website: "d4knrick.vercel.app",
     };
 
     set({ currentUser: mockUser, isAuthenticated: true });
