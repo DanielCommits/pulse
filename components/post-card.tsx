@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-
 import { motion } from "framer-motion";
 import {
   Heart,
@@ -13,6 +12,7 @@ import {
 import type { Post } from "@/lib/store";
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation"; // Added router
 import VerifiedBadge from "./VerifiedBadge";
 
 interface PostCardProps {
@@ -20,6 +20,7 @@ interface PostCardProps {
 }
 
 export default function PostCard({ post }: PostCardProps) {
+  const router = useRouter(); // Initialize router
   const [liked, setLiked] = useState(post.liked);
   const [likes, setLikes] = useState(post.likes);
   const [reposted, setReposted] = useState(false);
@@ -39,145 +40,150 @@ export default function PostCard({ post }: PostCardProps) {
     setReposts(reposted ? reposts - 1 : reposts + 1);
   };
 
+  // Logic to navigate on card click
+  const handlePostClick = () => {
+    router.push(`/post/${post.id}`);
+  };
+
   return (
-    <Link href={`/post/${post.id}`}>
-      <motion.article
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-[#161b22] border-b border-[#30363d] p-4 hover:bg-[#1c2128] transition-smooth cursor-pointer"
-      >
-        {/* Header */}
-<div className="flex items-start justify-between mb-3">
-  <div className="flex items-center gap-3">
-    {/* Avatar */}
-    <Link
-      href={`/profile/${post.username}`}
-      onClick={(e) => e.stopPropagation()} // prevent outer post click
+    // Removed the wrapping <Link> tag and used onClick
+    <motion.article
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      onClick={handlePostClick}
+      className="bg-[#161b22] border-b border-[#30363d] p-4 hover:bg-[#1c2128] transition-smooth cursor-pointer"
     >
-      <img
-        src={post.avatar || "/placeholder.svg"}
-        alt={post.displayName}
-        className="w-10 h-10 rounded-full border-2 border-[#30363d] object-cover cursor-pointer"
-      />
-    </Link>
+      {/* Header */}
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex items-center gap-3">
+          {/* Avatar */}
+          <Link
+            href={`/profile/${post.username}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={post.avatar || "/placeholder.svg"}
+              alt={post.displayName}
+              className="w-10 h-10 rounded-full border-2 border-[#30363d] object-cover cursor-pointer"
+            />
+          </Link>
 
-    <div>
-      {/* Name and Verified Badge */}
-      <Link
-        href={`/profile/${post.username}`}
-        onClick={(e) => e.stopPropagation()} // prevent outer post click
-        className="flex items-center gap-1"
-      >
-        <h3 className="font-semibold text-[#ffffff] flex items-center gap-1 cursor-pointer">
-          {post.displayName}
-          {post.verified && <VerifiedBadge size={16} />}
-        </h3>
-      </Link>
+          <div>
+            {/* Name and Verified Badge */}
+            <Link
+              href={`/profile/${post.username}`}
+              onClick={(e) => e.stopPropagation()}
+              className="flex items-center gap-1"
+            >
+              <h3 className="font-semibold text-[#ffffff] flex items-center gap-1 cursor-pointer">
+                {post.displayName}
+                {post.verified && <VerifiedBadge size={16} />}
+              </h3>
+            </Link>
 
-      {/* Username & timestamp */}
-      <p className="text-sm text-[#8b949e]">
-        @{post.username} · {post.timestamp}
-      </p>
-    </div>
-  </div>
-
-  {/* More button */}
-  <button
-    onClick={(e) => {
-      e.preventDefault();
-      e.stopPropagation();
-    }}
-    className="p-2 text-[#8b949e] hover:text-[#00ffff] hover:bg-[#1c2128] rounded-lg transition-smooth"
-  >
-    <MoreHorizontal className="w-5 h-5" />
-  </button>
-</div>
-
-
-        {/* Content */}
-        <p className="text-[#ffffff] mb-4 leading-relaxed">{post.content}</p>
-
-        {post.media && (
-          <div className="mb-4 rounded-lg overflow-hidden bg-[#0d1117] border border-[#30363d]">
-            {post.media.type === "image" ? (
-              <img
-                src={post.media.url || "/placeholder.svg"}
-                alt="Post media"
-                className="w-full h-auto max-h-96 object-cover"
-              />
-            ) : (
-              <video
-                src={post.media.url}
-                className="w-full h-auto max-h-96 object-cover"
-                controls
-              />
-            )}
+            {/* Username & timestamp */}
+            <p className="text-sm text-[#8b949e]">
+              @{post.username} · {post.timestamp}
+            </p>
           </div>
-        )}
+        </div>
 
-        {post.caption && (
-          <p className="text-[#8b949e] text-sm mb-4 italic">{post.caption}</p>
-        )}
+        {/* More button */}
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          className="p-2 text-[#8b949e] hover:text-[#00ffff] hover:bg-[#1c2128] rounded-lg transition-smooth"
+        >
+          <MoreHorizontal className="w-5 h-5" />
+        </button>
+      </div>
 
-        {/* Actions */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            {/* Like */}
-            <motion.button
-              whileTap={{ scale: 0.9 }}
-              onClick={handleLike}
-              className="flex items-center gap-2 text-[#8b949e] hover:text-[#00ffff] transition-smooth group"
-            >
-              <Heart
-                className={`w-5 h-5 ${
-                  liked ? "fill-[#00ffff] text-[#00ffff]" : ""
-                }`}
-              />
-              <span className="text-sm">{likes}</span>
-            </motion.button>
+      {/* Content */}
+      <p className="text-[#ffffff] mb-4 leading-relaxed">{post.content}</p>
 
-            {/* Comment */}
-            <motion.button
-              whileTap={{ scale: 0.9 }}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-              className="flex items-center gap-2 text-[#8b949e] hover:text-[#00ffff] transition-smooth"
-            >
-              <MessageCircle className="w-5 h-5" />
-              <span className="text-sm">{post.comments}</span>
-            </motion.button>
+      {post.media && (
+        <div className="mb-4 rounded-lg overflow-hidden bg-[#0d1117] border border-[#30363d]">
+          {post.media.type === "image" ? (
+            <img
+              src={post.media.url || "/placeholder.svg"}
+              alt="Post media"
+              className="w-full h-auto max-h-96 object-cover"
+            />
+          ) : (
+            <video
+              src={post.media.url}
+              className="w-full h-auto max-h-96 object-cover"
+              controls
+              onClick={(e) => e.stopPropagation()} // Added this so clicking play doesn't open post
+            />
+          )}
+        </div>
+      )}
 
-            <motion.button
-              whileTap={{ scale: 0.9 }}
-              onClick={handleRepost}
-              className={`flex items-center gap-2 transition-smooth ${
-                reposted
-                  ? "text-[#00ffff]"
-                  : "text-[#8b949e] hover:text-[#00ffff]"
+      {post.caption && (
+        <p className="text-[#8b949e] text-sm mb-4 italic">{post.caption}</p>
+      )}
+
+      {/* Actions */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-6">
+          {/* Like */}
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={handleLike}
+            className="flex items-center gap-2 text-[#8b949e] hover:text-[#00ffff] transition-smooth group"
+          >
+            <Heart
+              className={`w-5 h-5 ${
+                liked ? "fill-[#00ffff] text-[#00ffff]" : ""
               }`}
-            >
-              <Repeat2
-                className={`w-5 h-5 ${reposted ? "fill-[#00ffff]" : ""}`}
-              />
-              <span className="text-sm">{reposts}</span>
-            </motion.button>
-          </div>
+            />
+            <span className="text-sm">{likes}</span>
+          </motion.button>
 
-          {/* Bookmark */}
+          {/* Comment */}
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
             }}
-            className="text-[#8b949e] hover:text-[#00ffff] transition-smooth"
+            className="flex items-center gap-2 text-[#8b949e] hover:text-[#00ffff] transition-smooth"
           >
-            <Bookmark className="w-5 h-5" />
+            <MessageCircle className="w-5 h-5" />
+            <span className="text-sm">{post.comments}</span>
+          </motion.button>
+
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={handleRepost}
+            className={`flex items-center gap-2 transition-smooth ${
+              reposted
+                ? "text-[#00ffff]"
+                : "text-[#8b949e] hover:text-[#00ffff]"
+            }`}
+          >
+            <Repeat2
+              className={`w-5 h-5 ${reposted ? "fill-[#00ffff]" : ""}`}
+            />
+            <span className="text-sm">{reposts}</span>
           </motion.button>
         </div>
-      </motion.article>
-    </Link>
+
+        {/* Bookmark */}
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          className="text-[#8b949e] hover:text-[#00ffff] transition-smooth"
+        >
+          <Bookmark className="w-5 h-5" />
+        </motion.button>
+      </div>
+    </motion.article>
   );
 }
