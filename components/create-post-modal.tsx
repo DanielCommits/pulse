@@ -1,47 +1,91 @@
-"use client"
+"use client";
 
-import type React from "react"
-
-import { useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { X, ImageIcon, Smile } from "lucide-react"
-import { useAppStore } from "@/lib/store"
+import type React from "react";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, ImageIcon, Video, FileText } from "lucide-react"; // Imported Video and FileText icons
+import { useAppStore, Post } from "@/lib/store"; // Ensure Post type is imported
 
 interface CreatePostModalProps {
-  isOpen: boolean
-  onClose: () => void
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+// Define the local media state type
+interface SelectedMedia {
+  url: string;
+  type: "image" | "video";
 }
 
 export default function CreatePostModal({ isOpen, onClose }: CreatePostModalProps) {
-  const currentUser = useAppStore((state) => state.currentUser)
-  const addPost = useAppStore((state) => state.addPost)
-  const [content, setContent] = useState("")
+  const currentUser = useAppStore((state) => state.currentUser);
+  const addPost = useAppStore((state) => state.addPost);
+  
+  const [content, setContent] = useState("");
+  const [media, setMedia] = useState<SelectedMedia | null>(null); // State for selected media
+  const [isUploading, setIsUploading] = useState(false);
+
+  // --- Handlers ---
+
+  const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const fileType = file.type;
+    let type: "image" | "video";
+
+    if (fileType.startsWith("image/")) {
+      type = "image";
+    } else if (fileType.startsWith("video/")) {
+      type = "video";
+    } else {
+      alert("Unsupported file type. Please select an image or video.");
+      return;
+    }
+    
+    setIsUploading(true);
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const url = event.target?.result as string;
+      setMedia({ url, type });
+      setIsUploading(false);
+    };
+    reader.readAsDataURL(file);
+  };
+  
+  const handleRemoveMedia = () => {
+      setMedia(null);
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!content.trim() || !currentUser) return
+    e.preventDefault();
+    if (!content.trim() && !media || !currentUser) return; // Allow media-only posts
 
     // Create a new post object
-    const newPost = {
+    const newPost: Post = {
       id: `p${Date.now()}`,
       userId: currentUser.id,
       username: currentUser.username,
       displayName: currentUser.displayName,
       avatar: currentUser.avatar,
       content,
+      media: media ? { type: media.type, url: media.url } : undefined, // Attach media if present
       timestamp: "Just now",
       likes: 0,
       liked: false,
       shares: 0,
       comments: 0,
       verified: currentUser.verified,
-      // Add other fields as needed
-    }
+    };
 
-    addPost(newPost)
-    setContent("")
-    onClose()
-  }
+    addPost(newPost);
+    setContent("");
+    setMedia(null); // Clear media after submission
+    onClose();
+  };
+
+  const isSubmitDisabled = (!content.trim() && !media) || isUploading;
 
   return (
     <AnimatePresence>
@@ -91,22 +135,52 @@ export default function CreatePostModal({ isOpen, onClose }: CreatePostModalProp
                   maxLength={280}
                 />
               </div>
+              
+              {/* Media Preview Section */}
+              {media && (
+                <div className="relative mb-4 rounded-lg overflow-hidden border border-[#30363d] max-h-60 bg-black">
+                    {media.type === "image" ? (
+                        <img src={media.url} alt="Media preview" className="w-full h-full object-contain" />
+                    ) : (
+                        <video src={media.url} controls className="w-full h-full object-contain" />
+                    )}
+                    <button 
+                        type="button"
+                        onClick={handleRemoveMedia}
+                        className="absolute top-2 right-2 p-1 bg-black/50 hover:bg-black/70 rounded-full text-white transition-smooth"
+                    >
+                        <X className="w-4 h-4" />
+                    </button>
+                </div>
+              )}
 
-              {/* Character count */}
+
+              {/* Footer Actions and Count */}
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    className="p-2 text-[#8b949e] hover:text-[#00ffff] hover:bg-[#1c2128] rounded-lg transition-smooth"
+                  {/* Media Upload Button */}
+                  <label
+                    htmlFor="media-upload"
+                    className={`p-2 cursor-pointer transition-smooth rounded-lg flex items-center gap-2 
+                        ${media ? 'text-[#6e7681] cursor-not-allowed' : 'text-[#8b949e] hover:text-[#00ffff] hover:bg-[#1c2128]'}`
+                    }
                   >
-                    <ImageIcon className="w-5 h-5" />
-                  </button>
-                  <button
-                    type="button"
-                    className="p-2 text-[#8b949e] hover:text-[#00ffff] hover:bg-[#1c2128] rounded-lg transition-smooth"
-                  >
-                    <Smile className="w-5 h-5" />
-                  </button>
+                    <input
+                      id="media-upload"
+                      type="file"
+                      accept="image/*,video/*"
+                      onChange={handleMediaChange}
+                      className="hidden"
+                      disabled={!!media} // Disable if media is already attached
+                    />
+                    {media ? (
+                         <FileText className="w-5 h-5" /> // Show generic icon when file is attached
+                    ) : (
+                        <ImageIcon className="w-5 h-5" />
+                    )}
+                    
+                  </label>
+                  
                 </div>
                 <span className="text-sm text-[#6e7681]">{content.length}/280</span>
               </div>
@@ -114,17 +188,17 @@ export default function CreatePostModal({ isOpen, onClose }: CreatePostModalProp
               {/* Submit button */}
               <motion.button
                 type="submit"
-                disabled={!content.trim()}
+                disabled={isSubmitDisabled}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className="w-full py-3 bg-gradient-to-r from-[#00ffff] to-[#0ea5e9] text-[#0d1117] font-semibold rounded-lg hover:opacity-90 transition-smooth disabled:opacity-50 disabled:cursor-not-allowed glow-primary-sm"
               >
-                Post
+                {isUploading ? "Uploading..." : "Post"}
               </motion.button>
             </form>
           </motion.div>
         </>
       )}
     </AnimatePresence>
-  )
+  );
 }

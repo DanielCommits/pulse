@@ -12,19 +12,23 @@ import {
 import type { Post } from "@/lib/store";
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation"; // Added router
 import VerifiedBadge from "./VerifiedBadge";
+// Assuming you have a Modal component in your project
+import SimpleModal from "./SimpleModal";
 
 interface PostCardProps {
   post: Post;
 }
 
 export default function PostCard({ post }: PostCardProps) {
-  const router = useRouter(); // Initialize router
   const [liked, setLiked] = useState(post.liked);
   const [likes, setLikes] = useState(post.likes);
   const [reposted, setReposted] = useState(false);
   const [reposts, setReposts] = useState(post.shares);
+
+  // --- NEW STATE FOR IMAGE PREVIEW ---
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [selectedMediaUrl, setSelectedMediaUrl] = useState("");
 
   const handleLike = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -40,150 +44,216 @@ export default function PostCard({ post }: PostCardProps) {
     setReposts(reposted ? reposts - 1 : reposts + 1);
   };
 
-  // Logic to navigate on card click
-  const handlePostClick = () => {
-    router.push(`/post/${post.id}`);
+  // --- UPDATED MEDIA HANDLER ---
+  const handleMediaClick = (e: React.MouseEvent, url: string) => {
+    e.preventDefault(); // Prevents outer Link navigation
+    e.stopPropagation(); // Prevents outer Link navigation
+
+    // Only open the modal if it's an image
+    if (post.media?.type === "image") {
+      setSelectedMediaUrl(url);
+      setIsImageModalOpen(true);
+    }
+    // If it's a video, the propagation is stopped here, allowing it to play inline without navigating.
   };
 
+  const closeImageModal = () => {
+    setIsImageModalOpen(false);
+    setSelectedMediaUrl("");
+  };
+  // -------------------------
+
   return (
-    // Removed the wrapping <Link> tag and used onClick
-    <motion.article
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      onClick={handlePostClick}
-      className="bg-[#161b22] border-b border-[#30363d] p-4 hover:bg-[#1c2128] transition-smooth cursor-pointer"
-    >
-      {/* Header */}
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center gap-3">
-          {/* Avatar */}
-          <Link
-            href={`/profile/${post.username}`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <img
-              src={post.avatar || "/placeholder.svg"}
-              alt={post.displayName}
-              className="w-10 h-10 rounded-full border-2 border-[#30363d] object-cover cursor-pointer"
-            />
-          </Link>
+    <>
+      <Link href={`/post/${post.id}`}>
+        <motion.article
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-[#161b22] border-b border-[#30363d] p-4 hover:bg-[#1c2128] transition-smooth cursor-pointer"
+        >
+          {/* Header (omitted for brevity) */}
+          <div className="flex items-start justify-between mb-3">
+            <div className="flex items-center gap-3">
+              {/* Avatar */}
+              <Link
+                href={`/profile/${post.username}`}
+                onClick={(e) => e.stopPropagation()} // prevent outer post click
+              >
+                <img
+                  src={post.avatar || "/placeholder.svg"}
+                  alt={post.displayName}
+                  className="w-10 h-10 rounded-full border-2 border-[#30363d] object-cover cursor-pointer"
+                />
+              </Link>
 
-          <div>
-            {/* Name and Verified Badge */}
-            <Link
-              href={`/profile/${post.username}`}
-              onClick={(e) => e.stopPropagation()}
-              className="flex items-center gap-1"
+              <div>
+                {/* Name and Verified Badge */}
+                <Link
+                  href={`/profile/${post.username}`}
+                  onClick={(e) => e.stopPropagation()} // prevent outer post click
+                  className="flex items-center gap-1"
+                >
+                  <h3 className="font-semibold text-[#ffffff] flex items-center gap-1 cursor-pointer">
+                    {post.displayName}
+                    {post.verified && <VerifiedBadge size={16} />}
+                  </h3>
+                </Link>
+
+                {/* Username & timestamp */}
+                <p className="text-sm text-[#8b949e]">
+                  @{post.username} · {post.timestamp}
+                </p>
+              </div>
+            </div>
+
+            {/* More button */}
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+              className="p-2 text-[#8b949e] hover:text-[#00ffff] hover:bg-[#1c2128] rounded-lg transition-smooth"
             >
-              <h3 className="font-semibold text-[#ffffff] flex items-center gap-1 cursor-pointer">
-                {post.displayName}
-                {post.verified && <VerifiedBadge size={16} />}
-              </h3>
-            </Link>
-
-            {/* Username & timestamp */}
-            <p className="text-sm text-[#8b949e]">
-              @{post.username} · {post.timestamp}
-            </p>
+              <MoreHorizontal className="w-5 h-5" />
+            </button>
           </div>
-        </div>
+          {/* End Header */}
 
-        {/* More button */}
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-          }}
-          className="p-2 text-[#8b949e] hover:text-[#00ffff] hover:bg-[#1c2128] rounded-lg transition-smooth"
-        >
-          <MoreHorizontal className="w-5 h-5" />
-        </button>
-      </div>
+          {/* Content */}
+          <p className="text-[#ffffff] mb-4 leading-relaxed">{post.content}</p>
 
-      {/* Content */}
-      <p className="text-[#ffffff] mb-4 leading-relaxed">{post.content}</p>
+          {/* --- UPDATED MEDIA RENDERING WITH SIDE DARK BACKGROUND --- */}
+          {post.media && (
+            <div className="mb-4">
+              {/* Full-width dark background on large screens */}
+              <div className="hidden md:block w-full bg-[#0d1117] py-4">
+                <div className="flex justify-center">
+                  <div
+                    className="rounded-lg overflow-hidden border border-[#30363d] max-h-96 md:max-w-xl bg-[#0d1117]"
+                    onClick={(e) => handleMediaClick(e, post.media?.url || "")}
+                  >
+                    {post.media.type === "image" ? (
+                      <img
+                        src={post.media.url || "/placeholder.svg"}
+                        alt="Post media"
+                        className="w-full h-full max-h-96 object-contain cursor-pointer"
+                      />
+                    ) : (
+                      <video
+                        src={post.media.url}
+                        className="w-full h-auto max-h-96 object-contain"
+                        controls
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
 
-      {post.media && (
-        <div className="mb-4 rounded-lg overflow-hidden bg-[#0d1117] border border-[#30363d]">
-          {post.media.type === "image" ? (
-            <img
-              src={post.media.url || "/placeholder.svg"}
-              alt="Post media"
-              className="w-full h-auto max-h-96 object-cover"
-            />
-          ) : (
-            <video
-              src={post.media.url}
-              className="w-full h-auto max-h-96 object-cover"
-              controls
-              onClick={(e) => e.stopPropagation()} // Added this so clicking play doesn't open post
-            />
+              {/* Mobile version (no side background) */}
+              <div className="md:hidden">
+                <div
+                  className="rounded-lg overflow-hidden bg-[#0d1117] border border-[#30363d] w-full max-h-96"
+                  onClick={(e) => handleMediaClick(e, post.media?.url || "")}
+                >
+                  {post.media.type === "image" ? (
+                    <img
+                      src={post.media.url || "/placeholder.svg"}
+                      alt="Post media"
+                      className="w-full h-full max-h-96 object-contain cursor-pointer"
+                    />
+                  ) : (
+                    <video
+                      src={post.media.url}
+                      className="w-full h-auto max-h-96 object-contain"
+                      controls
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
           )}
-        </div>
+          {/* --- END UPDATED MEDIA RENDERING --- */}
+
+          {/* --- END UPDATED MEDIA RENDERING --- */}
+
+          {post.caption && (
+            // CAPTION FIX: Added text-center on medium/large screens to align with centered media
+            <p className="text-[#8b949e] text-sm mb-4 italic md:text-center">
+              {post.caption}
+            </p>
+          )}
+
+          {/* Actions (omitted for brevity) */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-6">
+              {/* Like */}
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={handleLike}
+                className="flex items-center gap-2 text-[#8b949e] hover:text-[#00ffff] transition-smooth group"
+              >
+                <Heart
+                  className={`w-5 h-5 ${
+                    liked ? "fill-[#00ffff] text-[#00ffff]" : ""
+                  }`}
+                />
+                <span className="text-sm">{likes}</span>
+              </motion.button>
+
+              {/* Comment */}
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+                className="flex items-center gap-2 text-[#8b949e] hover:text-[#00ffff] transition-smooth"
+              >
+                <MessageCircle className="w-5 h-5" />
+                <span className="text-sm">{post.comments}</span>
+              </motion.button>
+
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={handleRepost}
+                className={`flex items-center gap-2 transition-smooth ${
+                  reposted
+                    ? "text-[#00ffff]"
+                    : "text-[#8b949e] hover:text-[#00ffff]"
+                }`}
+              >
+                <Repeat2
+                  className={`w-5 h-5 ${reposted ? "fill-[#00ffff]" : ""}`}
+                />
+                <span className="text-sm">{reposts}</span>
+              </motion.button>
+            </div>
+
+            {/* Bookmark */}
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+              className="text-[#8b949e] hover:text-[#00ffff] transition-smooth"
+            >
+              <Bookmark className="w-5 h-5" />
+            </motion.button>
+          </div>
+        </motion.article>
+      </Link>
+
+      {/* --- NEW MODAL IMPLEMENTATION --- */}
+      {selectedMediaUrl && (
+        <SimpleModal isOpen={isImageModalOpen} onClose={closeImageModal}>
+          <img
+            src={selectedMediaUrl}
+            alt="Full size post media"
+            className="max-w-full max-h-[90vh] object-contain"
+          />
+        </SimpleModal>
       )}
-
-      {post.caption && (
-        <p className="text-[#8b949e] text-sm mb-4 italic">{post.caption}</p>
-      )}
-
-      {/* Actions */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-6">
-          {/* Like */}
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={handleLike}
-            className="flex items-center gap-2 text-[#8b949e] hover:text-[#00ffff] transition-smooth group"
-          >
-            <Heart
-              className={`w-5 h-5 ${
-                liked ? "fill-[#00ffff] text-[#00ffff]" : ""
-              }`}
-            />
-            <span className="text-sm">{likes}</span>
-          </motion.button>
-
-          {/* Comment */}
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-            }}
-            className="flex items-center gap-2 text-[#8b949e] hover:text-[#00ffff] transition-smooth"
-          >
-            <MessageCircle className="w-5 h-5" />
-            <span className="text-sm">{post.comments}</span>
-          </motion.button>
-
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={handleRepost}
-            className={`flex items-center gap-2 transition-smooth ${
-              reposted
-                ? "text-[#00ffff]"
-                : "text-[#8b949e] hover:text-[#00ffff]"
-            }`}
-          >
-            <Repeat2
-              className={`w-5 h-5 ${reposted ? "fill-[#00ffff]" : ""}`}
-            />
-            <span className="text-sm">{reposts}</span>
-          </motion.button>
-        </div>
-
-        {/* Bookmark */}
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-          }}
-          className="text-[#8b949e] hover:text-[#00ffff] transition-smooth"
-        >
-          <Bookmark className="w-5 h-5" />
-        </motion.button>
-      </div>
-    </motion.article>
+    </>
   );
 }
