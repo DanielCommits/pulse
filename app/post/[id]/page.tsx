@@ -389,6 +389,32 @@ export default function PostThreadPage({ params }: { params: Promise<{ id: strin
         <p className="text-[#ffffff] text-lg mb-4 leading-relaxed">
           {post.content}
         </p>
+        
+        {/* --- START: MEDIA RENDERING LOGIC ADDED HERE --- */}
+        {post.media && (
+          <div className="mb-4 rounded-lg overflow-hidden bg-[#0d1117] border border-[#30363d]">
+            {post.media.type === "image" ? (
+              <img
+                src={post.media.url || "/placeholder.svg"}
+                alt="Post media"
+                // Max height to keep it readable, but fill width
+                className="w-full h-auto max-h-[60vh] object-contain" 
+              />
+            ) : (
+              <video
+                src={post.media.url}
+                className="w-full h-auto max-h-[60vh] object-contain"
+                controls
+              />
+            )}
+          </div>
+        )}
+        {/* --- END: MEDIA RENDERING LOGIC ADDED HERE --- */}
+        
+        {post.caption && (
+            <p className="text-[#8b949e] text-sm mb-4 italic">{post.caption}</p>
+        )}
+
         <p className="text-[#8b949e] text-sm mb-6">{post.timestamp}</p>
 
         {/* Stats */}
