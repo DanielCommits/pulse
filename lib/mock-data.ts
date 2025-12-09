@@ -13,7 +13,7 @@ export interface Comment {
   likes: number;
   liked: boolean;
   verified: boolean;
-  parentId?: string;
+  parentId?: string | null;
 }
 
 export interface ChatMessage {
