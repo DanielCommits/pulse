@@ -42,6 +42,10 @@ export interface Story {
   viewed: boolean;
   caption?: string;
   verified: boolean;
+    media?: {
+    type: "image" | "video";
+    url: string;
+  };
 }
 
 export interface Message {
