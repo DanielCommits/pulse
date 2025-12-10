@@ -21,7 +21,8 @@ export default function StoryViewer({
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [progress, setProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const STORY_DURATION = 5000; // 5 seconds for images
+  const STORY_DURATION = 5000; // 5s for images
+  const MAX_VIDEO_DURATION = 120; // 2 minutes max for video
 
   const currentStory = stories[currentIndex];
   const currentUser = useAppStore((state) => state.currentUser);
@@ -31,33 +32,28 @@ export default function StoryViewer({
 
   // video refs & state
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const [videoMuted, setVideoMuted] = useState(true); // start muted for autoplay policies
-  const [videoInteracted, setVideoInteracted] = useState(false); // whether user tapped to enable sound/control
+  const [videoMuted, setVideoMuted] = useState(true);
+  const [videoInteracted, setVideoInteracted] = useState(false);
 
-  // Timer for images only. Skip timer when current item is a video.
+  /** IMAGE TIMER (only for images) */
   useEffect(() => {
     if (isPaused) return;
-    if (currentStory?.media?.type === "video") return; // don't run image timer for videos
+    if (currentStory?.media?.type === "video") return;
 
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
-          if (currentIndex < stories.length - 1) {
-            setCurrentIndex(currentIndex + 1);
-            return 0;
-          } else {
-            onClose();
-            return 100;
-          }
+          goToNext();
+          return 0;
         }
         return prev + (100 / STORY_DURATION) * 50;
       });
     }, 50);
 
     return () => clearInterval(interval);
-  }, [currentIndex, isPaused, stories.length, onClose, currentStory?.media?.type]);
+  }, [currentIndex, isPaused, currentStory?.media?.type]);
 
-  // Sync pause/play to video element
+  /** SYNC VIDEO PLAY/PAUSE */
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid) return;
@@ -65,30 +61,31 @@ export default function StoryViewer({
     if (isPaused) {
       vid.pause();
     } else {
-      // try play, ignore errors
       vid.play().catch(() => {});
     }
   }, [isPaused, currentIndex]);
 
-  // Update progress based on video playback (if video)
+  /** VIDEO PROGRESS & AUTO NEXT */
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid) return;
 
     const handleTimeUpdate = () => {
       if (!vid.duration || isNaN(vid.duration)) return;
-      const percentage = (vid.currentTime / vid.duration) * 100;
+
+      // cap video at MAX_VIDEO_DURATION
+      const cappedTime = Math.min(vid.currentTime, MAX_VIDEO_DURATION);
+      const percentage = (cappedTime / Math.min(vid.duration, MAX_VIDEO_DURATION)) * 100;
       setProgress(percentage);
+
+      // force next if exceeded 2 minutes
+      if (vid.currentTime >= MAX_VIDEO_DURATION) {
+        goToNext();
+      }
     };
 
     const handleEnded = () => {
-      // go to next when video ends
-      if (currentIndex < stories.length - 1) {
-        setCurrentIndex((i) => i + 1);
-        setProgress(0);
-      } else {
-        onClose();
-      }
+      goToNext();
     };
 
     vid.addEventListener("timeupdate", handleTimeUpdate);
@@ -98,20 +95,14 @@ export default function StoryViewer({
       vid.removeEventListener("timeupdate", handleTimeUpdate);
       vid.removeEventListener("ended", handleEnded);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentIndex, currentStory?.media?.url]);
 
+  /** NAVIGATION FUNCTIONS */
   const goToNext = () => {
     if (currentIndex < stories.length - 1) {
       setCurrentIndex(currentIndex + 1);
       setProgress(0);
-      // reset video interaction / mute for next item
-      setVideoInteracted(false);
-      setVideoMuted(true);
-      if (videoRef.current) {
-        videoRef.current.pause();
-        videoRef.current.currentTime = 0;
-      }
+      resetVideoState();
     } else {
       onClose();
     }
@@ -121,16 +112,21 @@ export default function StoryViewer({
     if (currentIndex > 0) {
       setCurrentIndex(currentIndex - 1);
       setProgress(0);
-      // reset video interaction / mute for previous item
-      setVideoInteracted(false);
-      setVideoMuted(true);
-      if (videoRef.current) {
-        videoRef.current.pause();
-        videoRef.current.currentTime = 0;
-      }
+      resetVideoState();
     }
   };
 
+  const resetVideoState = () => {
+    setVideoInteracted(false);
+    setVideoMuted(true);
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+      videoRef.current.muted = true;
+    }
+  };
+
+  /** KEYBOARD CONTROLS */
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === "ArrowRight") goToNext();
     if (e.key === "ArrowLeft") goToPrevious();
@@ -141,6 +137,7 @@ export default function StoryViewer({
     }
   };
 
+  /** DELETE STORY */
   const handleDelete = () => {
     if (window.confirm("Delete this story?")) {
       removeStory(currentStory.id);
@@ -155,24 +152,23 @@ export default function StoryViewer({
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentIndex, isPaused]);
 
+  /** MARK VIEWED */
   useEffect(() => {
     if (currentStory && !currentStory.viewed) {
       markStoryViewed(currentStory.id);
     }
   }, [currentStory, markStoryViewed]);
 
-  // user taps video area: treat as interaction -> unmute and toggle pause/play
+  /** MEDIA TAP INTERACTION */
   const handleMediaInteraction = () => {
     if (currentStory?.media?.type === "video" && videoRef.current) {
-      // mark interaction
       setVideoInteracted(true);
-      // unmute
       setVideoMuted(false);
       videoRef.current.muted = false;
-      // toggle pause/play
+
+      // toggle play/pause only
       if (videoRef.current.paused) {
         videoRef.current.play().catch(() => {});
         setIsPaused(false);
@@ -181,7 +177,7 @@ export default function StoryViewer({
         setIsPaused(true);
       }
     } else {
-      // for images, toggle pause/resume of timer
+      // image timer toggle
       setIsPaused((p) => !p);
     }
   };
@@ -196,10 +192,7 @@ export default function StoryViewer({
       {/* Progress bars */}
       <div className="absolute top-0 left-0 right-0 z-10 flex gap-1 p-2 md:p-4">
         {stories.map((_, index) => (
-          <div
-            key={index}
-            className="flex-1 h-0.5 md:h-1 bg-[#30363d] rounded-full overflow-hidden"
-          >
+          <div key={index} className="flex-1 h-0.5 md:h-1 bg-[#30363d] rounded-full overflow-hidden">
             <motion.div
               className="h-full bg-[#00ffff]"
               initial={{ width: "0%" }}
@@ -230,12 +223,10 @@ export default function StoryViewer({
               <h3 className="font-semibold text-[#ffffff] text-sm md:text-base truncate">
                 {currentStory.username}
               </h3>
-
               {(currentStory.username === currentUser?.username
                 ? currentUser.verified
                 : currentStory.verified) && <VerifiedBadge size={17} />}
             </div>
-
             <p className="text-xs text-[#8b949e]">5h ago</p>
           </div>
         </div>
@@ -247,11 +238,7 @@ export default function StoryViewer({
             className="p-1.5 md:p-2 text-[#ffffff] hover:bg-[#1c2128] rounded-lg transition-smooth"
             aria-label={isPaused ? "Play" : "Pause"}
           >
-            {isPaused ? (
-              <Play className="w-4 h-4 md:w-5 md:h-5" />
-            ) : (
-              <Pause className="w-4 h-4 md:w-5 md:h-5" />
-            )}
+            {isPaused ? <Play className="w-4 h-4 md:w-5 md:h-5" /> : <Pause className="w-4 h-4 md:w-5 md:h-5" />}
           </motion.button>
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -286,15 +273,9 @@ export default function StoryViewer({
           transition={{ duration: 0.3 }}
           className="relative w-full h-full flex items-center justify-center"
         >
-          {/* === MEDIA DISPLAY FIX === */}
           {currentStory.media ? (
             currentStory.media.type === "image" ? (
-              <div
-                onClick={handleMediaInteraction}
-                className="cursor-pointer"
-                role="button"
-                tabIndex={0}
-              >
+              <div onClick={handleMediaInteraction} className="cursor-pointer" role="button" tabIndex={0}>
                 <img
                   src={currentStory.media.url}
                   alt="Story"
@@ -302,62 +283,42 @@ export default function StoryViewer({
                     const img = e.currentTarget as HTMLImageElement;
                     setIsTallImage(img.naturalHeight > img.naturalWidth);
                   }}
-                  className={`object-contain md:rounded-lg
-            ${
-              isTallImage
-                ? "max-w-full max-h-[calc(100vh-120px)]"
-                : "max-w-[calc(100vw-64px)] max-h-[calc(100vh-120px)] md:max-w-[calc(80vw-120px)] md:max-h-[calc(80vh-160px)]"
-            }
-          `}
+                  className={`object-contain md:rounded-lg ${
+                    isTallImage
+                      ? "max-w-full max-h-[calc(100vh-120px)]"
+                      : "max-w-[calc(100vw-64px)] max-h-[calc(100vh-120px)] md:max-w-[calc(80vw-120px)] md:max-h-[calc(80vh-160px)]"
+                  }`}
                 />
               </div>
             ) : (
-              <div
-                onClick={handleMediaInteraction}
-                className="cursor-pointer"
-                role="button"
-                tabIndex={0}
-              >
+              <div onClick={handleMediaInteraction} className="cursor-pointer" role="button" tabIndex={0}>
                 <video
                   ref={videoRef}
                   src={currentStory.media.url}
                   autoPlay
                   playsInline
                   muted={videoMuted}
-                  // don't loop by default — we navigate on ended
                   className="max-w-full max-h-[calc(100vh-120px)] object-contain md:rounded-lg"
                 />
               </div>
             )
           ) : (
-            // fallback: old behaviour
             <img
-              src={
-                currentStory.avatar ||
-                "/placeholder.svg?height=800&width=450&query=story-content"
-              }
+              src={currentStory.avatar || "/placeholder.svg?height=800&width=450&query=story-content"}
               alt="Story"
               className="object-contain max-w-full max-h-[calc(100vh-120px)] md:rounded-lg"
             />
           )}
 
           {currentStory.caption && (
-            <div
-              className="
-      absolute bottom-6 left-4 right-4 
-      p-3 bg-black/40 rounded-md text-white 
-      text-sm md:text-base
-
-      md:left-1/2 md:-translate-x-1/2 md:w-auto md:max-w-[70%] md:text-center
-    "
-            >
+            <div className="absolute bottom-6 left-4 right-4 p-3 bg-black/40 rounded-md text-white text-sm md:text-base md:left-1/2 md:-translate-x-1/2 md:w-auto md:max-w-[70%] md:text-center">
               {currentStory.caption}
             </div>
           )}
         </motion.div>
       </AnimatePresence>
 
-      {/* Navigation - Desktop */}
+      {/* Desktop navigation */}
       <div className="hidden md:flex absolute inset-0 items-center justify-between px-4 pointer-events-none">
         {currentIndex > 0 && (
           <motion.button
@@ -384,13 +345,9 @@ export default function StoryViewer({
         )}
       </div>
 
-      {/* Tap zones for mobile */}
+      {/* Mobile tap zones */}
       <div className="md:hidden absolute inset-0 flex">
-        <button
-          onClick={goToPrevious}
-          className="flex-1"
-          aria-label="Previous story"
-        />
+        <button onClick={goToPrevious} className="flex-1" aria-label="Previous story" />
         <button onClick={goToNext} className="flex-1" aria-label="Next story" />
       </div>
     </motion.div>
