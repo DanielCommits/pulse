@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronLeft, ChevronRight, Pause, Play, Trash } from "lucide-react";
 import { useAppStore } from "@/lib/store";
@@ -21,7 +21,7 @@ export default function StoryViewer({
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [progress, setProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const STORY_DURATION = 5000; // 5 seconds
+  const STORY_DURATION = 5000; // 5 seconds for images
 
   const currentStory = stories[currentIndex];
   const currentUser = useAppStore((state) => state.currentUser);
@@ -29,8 +29,15 @@ export default function StoryViewer({
   const markStoryViewed = useAppStore((state) => state.markStoryViewed);
   const [isTallImage, setIsTallImage] = useState(false);
 
+  // video refs & state
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [videoMuted, setVideoMuted] = useState(true); // start muted for autoplay policies
+  const [videoInteracted, setVideoInteracted] = useState(false); // whether user tapped to enable sound/control
+
+  // Timer for images only. Skip timer when current item is a video.
   useEffect(() => {
     if (isPaused) return;
+    if (currentStory?.media?.type === "video") return; // don't run image timer for videos
 
     const interval = setInterval(() => {
       setProgress((prev) => {
@@ -48,12 +55,63 @@ export default function StoryViewer({
     }, 50);
 
     return () => clearInterval(interval);
-  }, [currentIndex, isPaused, stories.length, onClose]);
+  }, [currentIndex, isPaused, stories.length, onClose, currentStory?.media?.type]);
+
+  // Sync pause/play to video element
+  useEffect(() => {
+    const vid = videoRef.current;
+    if (!vid) return;
+
+    if (isPaused) {
+      vid.pause();
+    } else {
+      // try play, ignore errors
+      vid.play().catch(() => {});
+    }
+  }, [isPaused, currentIndex]);
+
+  // Update progress based on video playback (if video)
+  useEffect(() => {
+    const vid = videoRef.current;
+    if (!vid) return;
+
+    const handleTimeUpdate = () => {
+      if (!vid.duration || isNaN(vid.duration)) return;
+      const percentage = (vid.currentTime / vid.duration) * 100;
+      setProgress(percentage);
+    };
+
+    const handleEnded = () => {
+      // go to next when video ends
+      if (currentIndex < stories.length - 1) {
+        setCurrentIndex((i) => i + 1);
+        setProgress(0);
+      } else {
+        onClose();
+      }
+    };
+
+    vid.addEventListener("timeupdate", handleTimeUpdate);
+    vid.addEventListener("ended", handleEnded);
+
+    return () => {
+      vid.removeEventListener("timeupdate", handleTimeUpdate);
+      vid.removeEventListener("ended", handleEnded);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentIndex, currentStory?.media?.url]);
 
   const goToNext = () => {
     if (currentIndex < stories.length - 1) {
       setCurrentIndex(currentIndex + 1);
       setProgress(0);
+      // reset video interaction / mute for next item
+      setVideoInteracted(false);
+      setVideoMuted(true);
+      if (videoRef.current) {
+        videoRef.current.pause();
+        videoRef.current.currentTime = 0;
+      }
     } else {
       onClose();
     }
@@ -63,6 +121,13 @@ export default function StoryViewer({
     if (currentIndex > 0) {
       setCurrentIndex(currentIndex - 1);
       setProgress(0);
+      // reset video interaction / mute for previous item
+      setVideoInteracted(false);
+      setVideoMuted(true);
+      if (videoRef.current) {
+        videoRef.current.pause();
+        videoRef.current.currentTime = 0;
+      }
     }
   };
 
@@ -90,13 +155,36 @@ export default function StoryViewer({
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentIndex, isPaused]);
 
   useEffect(() => {
     if (currentStory && !currentStory.viewed) {
       markStoryViewed(currentStory.id);
     }
-  }, [currentStory]);
+  }, [currentStory, markStoryViewed]);
+
+  // user taps video area: treat as interaction -> unmute and toggle pause/play
+  const handleMediaInteraction = () => {
+    if (currentStory?.media?.type === "video" && videoRef.current) {
+      // mark interaction
+      setVideoInteracted(true);
+      // unmute
+      setVideoMuted(false);
+      videoRef.current.muted = false;
+      // toggle pause/play
+      if (videoRef.current.paused) {
+        videoRef.current.play().catch(() => {});
+        setIsPaused(false);
+      } else {
+        videoRef.current.pause();
+        setIsPaused(true);
+      }
+    } else {
+      // for images, toggle pause/resume of timer
+      setIsPaused((p) => !p);
+    }
+  };
 
   return (
     <motion.div
@@ -157,6 +245,7 @@ export default function StoryViewer({
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsPaused(!isPaused)}
             className="p-1.5 md:p-2 text-[#ffffff] hover:bg-[#1c2128] rounded-lg transition-smooth"
+            aria-label={isPaused ? "Play" : "Pause"}
           >
             {isPaused ? (
               <Play className="w-4 h-4 md:w-5 md:h-5" />
@@ -169,6 +258,7 @@ export default function StoryViewer({
             whileTap={{ scale: 0.95 }}
             onClick={onClose}
             className="p-1.5 md:p-2 text-[#ffffff] hover:bg-[#1c2128] rounded-lg transition-smooth"
+            aria-label="Close"
           >
             <X className="w-4 h-4 md:w-5 md:h-5" />
           </motion.button>
@@ -199,30 +289,45 @@ export default function StoryViewer({
           {/* === MEDIA DISPLAY FIX === */}
           {currentStory.media ? (
             currentStory.media.type === "image" ? (
-              <img
-                src={currentStory.media.url}
-                alt="Story"
-                onLoad={(e) => {
-                  const img = e.currentTarget as HTMLImageElement;
-                  setIsTallImage(img.naturalHeight > img.naturalWidth);
-                }}
-                className={`object-contain md:rounded-lg
+              <div
+                onClick={handleMediaInteraction}
+                className="cursor-pointer"
+                role="button"
+                tabIndex={0}
+              >
+                <img
+                  src={currentStory.media.url}
+                  alt="Story"
+                  onLoad={(e) => {
+                    const img = e.currentTarget as HTMLImageElement;
+                    setIsTallImage(img.naturalHeight > img.naturalWidth);
+                  }}
+                  className={`object-contain md:rounded-lg
             ${
               isTallImage
                 ? "max-w-full max-h-[calc(100vh-120px)]"
                 : "max-w-[calc(100vw-64px)] max-h-[calc(100vh-120px)] md:max-w-[calc(80vw-120px)] md:max-h-[calc(80vh-160px)]"
             }
           `}
-              />
+                />
+              </div>
             ) : (
-              <video
-                src={currentStory.media.url}
-                autoPlay
-                playsInline
-                muted
-                loop
-                className="max-w-full max-h-[calc(100vh-120px)] object-contain md:rounded-lg"
-              />
+              <div
+                onClick={handleMediaInteraction}
+                className="cursor-pointer"
+                role="button"
+                tabIndex={0}
+              >
+                <video
+                  ref={videoRef}
+                  src={currentStory.media.url}
+                  autoPlay
+                  playsInline
+                  muted={videoMuted}
+                  // don't loop by default — we navigate on ended
+                  className="max-w-full max-h-[calc(100vh-120px)] object-contain md:rounded-lg"
+                />
+              </div>
             )
           ) : (
             // fallback: old behaviour
@@ -260,6 +365,7 @@ export default function StoryViewer({
             whileTap={{ scale: 0.9 }}
             onClick={goToPrevious}
             className="p-3 bg-[#161b22]/80 backdrop-blur-sm text-[#ffffff] rounded-full hover:bg-[#1c2128] transition-smooth pointer-events-auto"
+            aria-label="Previous story"
           >
             <ChevronLeft className="w-6 h-6" />
           </motion.button>
@@ -271,6 +377,7 @@ export default function StoryViewer({
             whileTap={{ scale: 0.9 }}
             onClick={goToNext}
             className="p-3 bg-[#161b22]/80 backdrop-blur-sm text-[#ffffff] rounded-full hover:bg-[#1c2128] transition-smooth pointer-events-auto"
+            aria-label="Next story"
           >
             <ChevronRight className="w-6 h-6" />
           </motion.button>
