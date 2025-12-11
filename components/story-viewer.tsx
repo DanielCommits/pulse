@@ -35,7 +35,7 @@ export default function StoryViewer({
   const [videoMuted, setVideoMuted] = useState(true);
   const [videoInteracted, setVideoInteracted] = useState(false);
 
-  /** IMAGE TIMER (only for images) */
+  // ---------- IMAGE TIMER (unchanged) ----------
   useEffect(() => {
     if (isPaused) return;
     if (currentStory?.media?.type === "video") return;
@@ -53,7 +53,7 @@ export default function StoryViewer({
     return () => clearInterval(interval);
   }, [currentIndex, isPaused, currentStory?.media?.type]);
 
-  /** SYNC VIDEO PLAY/PAUSE */
+  // ---------- SYNC VIDEO PLAY/PAUSE (keeps play/pause state in sync) ----------
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid) return;
@@ -61,31 +61,81 @@ export default function StoryViewer({
     if (isPaused) {
       vid.pause();
     } else {
+      // attempt to play; if blocked, nothing we can do until user interacts
       vid.play().catch(() => {});
     }
   }, [isPaused, currentIndex]);
 
-  /** VIDEO PROGRESS & AUTO NEXT */
+  // ---------- SMOOTH PROGRESS FOR VIDEO (Instagram-like) ----------
+  useEffect(() => {
+    let rafId: number | null = null;
+    const vid = videoRef.current;
+    let lastTimestamp = performance.now();
+
+    // update function driven by requestAnimationFrame for smooth progress
+    const update = () => {
+      if (!vid) return;
+
+      // If paused, do not advance progress
+      if (vid.paused || isPaused) {
+        // still reflect exact progress so bar doesn't jump when resumed
+        const dur = Math.min(vid.duration || MAX_VIDEO_DURATION, MAX_VIDEO_DURATION);
+        if (dur > 0 && !isNaN(dur)) {
+          const capped = Math.min(vid.currentTime, MAX_VIDEO_DURATION);
+          setProgress((capped / dur) * 100);
+        }
+        rafId = requestAnimationFrame(update);
+        return;
+      }
+
+      // normal playing state
+      const dur = Math.min(vid.duration || MAX_VIDEO_DURATION, MAX_VIDEO_DURATION);
+      if (dur > 0 && !isNaN(dur)) {
+        const capped = Math.min(vid.currentTime, MAX_VIDEO_DURATION);
+        const pct = (capped / dur) * 100;
+        setProgress(pct);
+      }
+
+      // if video exceeded cap, go to next
+      if (vid.currentTime >= MAX_VIDEO_DURATION) {
+        goToNext();
+        return;
+      }
+
+      rafId = requestAnimationFrame(update);
+    };
+
+    // start RAF only for videos
+    if (currentStory?.media?.type === "video" && vid) {
+      // ensure progress is set initially
+      setProgress(0);
+      // If video was already playing, start RAF immediately
+      rafId = requestAnimationFrame(update);
+    }
+
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+    // we depend on currentIndex and isPaused; not on vid events necessarily
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentIndex, isPaused, currentStory?.media?.url]);
+
+  // also add 'timeupdate' and 'ended' listeners as fallback (keeps auto-next reliable)
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid) return;
 
-    const handleTimeUpdate = () => {
-      if (!vid.duration || isNaN(vid.duration)) return;
-
-      // cap video at MAX_VIDEO_DURATION
-      const cappedTime = Math.min(vid.currentTime, MAX_VIDEO_DURATION);
-      const percentage = (cappedTime / Math.min(vid.duration, MAX_VIDEO_DURATION)) * 100;
-      setProgress(percentage);
-
-      // force next if exceeded 2 minutes
-      if (vid.currentTime >= MAX_VIDEO_DURATION) {
-        goToNext();
-      }
-    };
-
     const handleEnded = () => {
       goToNext();
+    };
+
+    const handleTimeUpdate = () => {
+      // set progress here too (defensive, in case RAF lags)
+      if (!vid.duration || isNaN(vid.duration)) return;
+      const dur = Math.min(vid.duration, MAX_VIDEO_DURATION);
+      const capped = Math.min(vid.currentTime, MAX_VIDEO_DURATION);
+      setProgress((capped / dur) * 100);
+      if (vid.currentTime >= MAX_VIDEO_DURATION) goToNext();
     };
 
     vid.addEventListener("timeupdate", handleTimeUpdate);
@@ -97,7 +147,7 @@ export default function StoryViewer({
     };
   }, [currentIndex, currentStory?.media?.url]);
 
-  /** NAVIGATION FUNCTIONS */
+  // ---------- NAVIGATION FUNCTIONS (unchanged) ----------
   const goToNext = () => {
     if (currentIndex < stories.length - 1) {
       setCurrentIndex(currentIndex + 1);
@@ -122,11 +172,15 @@ export default function StoryViewer({
     if (videoRef.current) {
       videoRef.current.pause();
       videoRef.current.currentTime = 0;
-      videoRef.current.muted = true;
+      try {
+        videoRef.current.muted = true;
+      } catch {
+        /* ignore */
+      }
     }
   };
 
-  /** KEYBOARD CONTROLS */
+  // ---------- KEYBOARD & DELETE (unchanged) ----------
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === "ArrowRight") goToNext();
     if (e.key === "ArrowLeft") goToPrevious();
@@ -137,7 +191,6 @@ export default function StoryViewer({
     }
   };
 
-  /** DELETE STORY */
   const handleDelete = () => {
     if (window.confirm("Delete this story?")) {
       removeStory(currentStory.id);
@@ -154,32 +207,43 @@ export default function StoryViewer({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [currentIndex, isPaused]);
 
-  /** MARK VIEWED */
+  // ---------- MARK VIEWED ----------
   useEffect(() => {
     if (currentStory && !currentStory.viewed) {
       markStoryViewed(currentStory.id);
     }
   }, [currentStory, markStoryViewed]);
 
-  /** MEDIA TAP INTERACTION */
-  const handleMediaInteraction = () => {
+  // ---------- MEDIA TAP INTERACTION (tap to unmute/play for videos) ----------
+  const handleMediaInteraction = async () => {
+    // If it's a video, treat this as a user gesture: toggle play/pause and ensure unmuted after first interaction
     if (currentStory?.media?.type === "video" && videoRef.current) {
       setVideoInteracted(true);
-      setVideoMuted(false);
-      videoRef.current.muted = false;
 
-      // toggle play/pause only
-      if (videoRef.current.paused) {
-        videoRef.current.play().catch(() => {});
+      try {
+        // unmute on first interaction
+        if (videoRef.current.muted) {
+          videoRef.current.muted = false;
+          setVideoMuted(false);
+        }
+
+        if (videoRef.current.paused) {
+          await videoRef.current.play();
+          setIsPaused(false);
+        } else {
+          videoRef.current.pause();
+          setIsPaused(true);
+        }
+      } catch {
+        // playing might fail on some browsers until a clear user gesture — but this is triggered by tap so should work
         setIsPaused(false);
-      } else {
-        videoRef.current.pause();
-        setIsPaused(true);
       }
-    } else {
-      // image timer toggle
-      setIsPaused((p) => !p);
+
+      return;
     }
+
+    // for images, just toggle pause/resume of the image timer
+    setIsPaused((p) => !p);
   };
 
   return (
@@ -204,7 +268,7 @@ export default function StoryViewer({
                     ? `${progress}%`
                     : "0%",
               }}
-              transition={{ duration: 0.1 }}
+              transition={{ duration: 0.08 }} // short smoothing; actual progress driven by RAF
             />
           </div>
         ))}
@@ -291,12 +355,15 @@ export default function StoryViewer({
                 />
               </div>
             ) : (
+              // VIDEO: note playsInline and webkit-playsinline to improve mobile behavior
               <div onClick={handleMediaInteraction} className="cursor-pointer" role="button" tabIndex={0}>
                 <video
                   ref={videoRef}
                   src={currentStory.media.url}
                   autoPlay
                   playsInline
+                  // @ts-ignore webkit attribute
+                  {...{ "webkit-playsinline": true }}
                   muted={videoMuted}
                   className="max-w-full max-h-[calc(100vh-120px)] object-contain md:rounded-lg"
                 />
