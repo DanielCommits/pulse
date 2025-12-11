@@ -412,10 +412,28 @@ export default function StoryViewer({
         )}
       </div>
 
-      {/* Mobile tap zones */}
-      <div className="md:hidden absolute inset-0 flex">
-        <button onClick={goToPrevious} className="flex-1" aria-label="Previous story" />
-        <button onClick={goToNext} className="flex-1" aria-label="Next story" />
+      {/* MOBILE TAP ZONES (The Fix)
+          Left 30% = Previous
+          Center 40% = Play/Pause/Unmute (The User Gesture)
+          Right 30% = Next
+          Z-Index 10 ensures they are above video (Z-0) but below Header (Z-30) 
+      */}
+      <div className="md:hidden absolute inset-0 z-10 flex">
+        <button 
+          onClick={(e) => { e.stopPropagation(); goToPrevious(); }} 
+          className="w-[30%] h-full outline-none tap-highlight-transparent" 
+          aria-label="Previous story" 
+        />
+        <button 
+          onClick={(e) => { e.stopPropagation(); handleMediaInteraction(); }} 
+          className="flex-1 h-full outline-none tap-highlight-transparent" 
+          aria-label="Toggle playback" 
+        />
+        <button 
+          onClick={(e) => { e.stopPropagation(); goToNext(); }} 
+          className="w-[30%] h-full outline-none tap-highlight-transparent" 
+          aria-label="Next story" 
+        />
       </div>
     </motion.div>
   );
