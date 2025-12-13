@@ -1,0 +1,63 @@
+mutation CreateVibe($content: String!, $imageUrl: String, $visibility: String!) @auth(level: USER) {
+  vibe_insert(data: {
+    content: $content,
+    imageUrl: $imageUrl,
+    visibility: $visibility,
+    userId_expr: "auth.uid"
+  })
+}
+
+query GetVibe($id: UUID!) @auth(level: PUBLIC, insecureReason: "This operation is safe to expose to the public") {
+  vibe(id: $id) {
+    id
+    content
+    imageUrl
+    visibility
+    user {
+      id
+      username
+    }
+    createdAt
+    comments_on_vibe {
+      id
+      content
+      user {
+        id
+        username
+      }
+      createdAt
+    }
+  }
+}
+
+mutation CreateComment($vibeId: UUID!, $content: String!) @auth(level: USER) {
+  comment_insert(data: {
+    vibeId: $vibeId,
+    content: $content,
+    userId_expr: "auth.uid",
+    createdAt_expr: "request.time"
+  })
+}
+
+query ListVibes @auth(level: PUBLIC, insecureReason: "This operation is safe to expose to the public") {
+  vibes(orderBy: [{createdAt: DESC}], limit: 20) {
+    id
+    content
+    imageUrl
+    visibility
+    user {
+      id
+      username
+    }
+    createdAt
+    comments_on_vibe {
+      id
+      content
+      user {
+        id
+        username
+      }
+      createdAt
+    }
+  }
+}

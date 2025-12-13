@@ -1,0 +1,47 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // --- Helper Function: Check for Admin Role ---
+    // This function looks up the profile of the current authenticated user (request.auth.uid)
+    // and checks if their 'role' field is set to 'admin'.
+    function isAdmin() {
+      // Note: This relies on the 'users' collection having a document ID that matches the user's UID.
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // --- Match the 'users' Collection ---
+    match /users/{userId} {
+      
+      // 1. Read Permissions
+      allow read: if request.auth != null && (
+        request.auth.uid == userId || // A user can always read their own profile
+        resource.data.is_banned == false // Everyone else can read the profile IF the user is NOT banned
+      );
+      
+      // 2. Create Permissions
+      // Allow creation of a new user profile document ONLY if the document ID matches the new user's UID.
+      allow create: if request.auth.uid == userId
+        // Ensure new users set default, non-privileged values
+        && request.resource.data.role == 'user'
+        && request.resource.data.is_banned == false;
+      
+      // 3. Update Permissions
+      allow update: if 
+        // A. GOD MODE RULE: Allow Admins to update ANY profile (including sensitive fields)
+        isAdmin()
+        
+        // OR
+        
+        // B. STANDARD USER RULE: Allow the user to update THEIR OWN profile...
+        || request.auth.uid == userId
+           // ...BUT prevent them from changing the critical, sensitive fields
+           && !('role' in request.resource.data) // Cannot change role
+           && !('verified' in request.resource.data) // Cannot change verified status
+           && !('is_banned' in request.resource.data); // Cannot change banned status
+    }
+    
+    // NOTE: Add rules for your other collections (posts, messages, etc.) below this.
+    // match /posts/{postId} { ... }
+  }
+}
