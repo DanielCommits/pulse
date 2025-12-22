@@ -1,6 +1,16 @@
 // Import the necessary functions from the SDKs
 import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
-import { getAuth, Auth } from "firebase/auth";
+import {
+  getAuth,
+  Auth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  User as FirebaseUser,
+  sendEmailVerification,
+  reload,
+} from "firebase/auth";
 import { getFirestore, Firestore } from "firebase/firestore";
 // If you are using analytics
 import { getAnalytics, Analytics } from "firebase/analytics";
@@ -39,3 +49,126 @@ analytics = getAnalytics(app); // Keep this if you want to use analytics
 
 // Export the initialized services
 export { app, auth, db, analytics };
+
+// ============================================
+// AUTH FUNCTIONS
+// ============================================
+
+export interface AuthErrorResponse {
+  code: string;
+  message: string;
+}
+
+/**
+ * Sign up a new user with email and password
+ */
+export const signUp = async (
+  email: string,
+  password: string
+): Promise<FirebaseUser> => {
+  try {
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+    return userCredential.user;
+  } catch (error) {
+    throw formatAuthError(error);
+  }
+};
+
+/**
+ * Log in with email and password
+ */
+export const logIn = async (
+  email: string,
+  password: string
+): Promise<FirebaseUser> => {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    return userCredential.user;
+  } catch (error) {
+    throw formatAuthError(error);
+  }
+};
+
+/**
+ * Log out the current user
+ */
+export const logOut = async (): Promise<void> => {
+  try {
+    await signOut(auth);
+  } catch (error) {
+    throw formatAuthError(error);
+  }
+};
+
+/**
+ * Subscribe to auth state changes
+ * Returns an unsubscribe function
+ */
+export const subscribeToAuthChanges = (
+  callback: (user: FirebaseUser | null) => void
+): (() => void) => {
+  return onAuthStateChanged(auth, callback);
+};
+
+/**
+ * Send verification email to user
+ */
+export const sendVerificationEmail = async (
+  user: FirebaseUser
+): Promise<void> => {
+  try {
+    await sendEmailVerification(user);
+  } catch (error) {
+    throw formatAuthError(error);
+  }
+};
+
+/**
+ * Check if user's email is verified and refresh token
+ */
+export const checkEmailVerified = async (
+  user: FirebaseUser
+): Promise<boolean> => {
+  try {
+    await reload(user);
+    return user.emailVerified;
+  } catch (error) {
+    throw formatAuthError(error);
+  }
+};
+
+/**
+ * Helper function to format Firebase auth errors
+ */
+const formatAuthError = (error: unknown): AuthErrorResponse => {
+  if (error instanceof Error && "code" in error) {
+    const fbError = error as any;
+    const code = fbError.code || "auth/unknown-error";
+    const message = fbError.message || "An unknown error occurred";
+
+    // Map common Firebase error codes to user-friendly messages
+    const errorMessages: Record<string, string> = {
+      "auth/email-already-in-use": "This email is already in use",
+      "auth/invalid-email": "Invalid email address",
+      "auth/weak-password": "Password must be at least 6 characters",
+      "auth/user-not-found": "User not found",
+      "auth/wrong-password": "Incorrect password",
+      "auth/too-many-requests": "Too many failed login attempts. Try again later",
+      "auth/user-disabled": "This account has been disabled",
+    };
+
+    return {
+      code,
+      message: errorMessages[code] || message,
+    };
+  }
+
+  return {
+    code: "auth/unknown-error",
+    message: "An unknown error occurred",
+  };
+};
