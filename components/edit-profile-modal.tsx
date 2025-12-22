@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { useAppStore } from "@/lib/store";
@@ -19,12 +19,25 @@ export default function EditProfileModal({
   const currentUser = useAppStore((state) => state.currentUser);
   const updateUserProfile = useAppStore((state) => state.updateUserProfile);
   const [formData, setFormData] = useState({
-    displayName: currentUser?.displayName || "",
-    bio: currentUser?.bio || "",
-    location: currentUser?.location || "",
-    website: currentUser?.website || "",
-    username: currentUser?.username || "",
+    displayName: "",
+    bio: "",
+    location: "",
+    website: "",
+    username: "",
   });
+
+  // Update form data when currentUser or modal opens
+  useEffect(() => {
+    if (isOpen && currentUser) {
+      setFormData({
+        displayName: currentUser.displayName || "",
+        bio: currentUser.bio || "",
+        location: currentUser.location || "",
+        website: currentUser.website || "",
+        username: currentUser.username || "",
+      });
+    }
+  }, [isOpen, currentUser]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>

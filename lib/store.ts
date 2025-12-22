@@ -42,7 +42,7 @@ export interface Story {
   viewed: boolean;
   caption?: string;
   verified: boolean;
-    media?: {
+  media?: {
     type: "image" | "video";
     url: string;
   };
@@ -106,23 +106,9 @@ export const useAppStore = create<AppState>((set) => ({
   setCurrentUser: (user) => set({ currentUser: user }),
   setAuthenticated: (value) => set({ isAuthenticated: value }),
   login: async (email: string, password: string) => {
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    // Mock user data
-    const mockUser: User = {
-      id: "1",
-      username: "d4knrick",
-      displayName: "Omoare Daniel",
-      avatar: "/diverse-profile-avatars.png",
-      bio: "Designer & Developer | Building the future",
-      homies: 1234,
-      verified: true,
-      location: "San Francisco, CA",
-      website: "d4knrick.vercel.app",
-    };
-
-    set({ currentUser: mockUser, isAuthenticated: true });
+    // TODO: Add Firebase login logic here
+    // For now, this is handled in the login page
+    await new Promise((resolve) => setTimeout(resolve, 500));
   },
   logout: () => {
     set({ currentUser: null, isAuthenticated: false });

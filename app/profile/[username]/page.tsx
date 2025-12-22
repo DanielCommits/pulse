@@ -33,7 +33,6 @@ import EditProfileModal from "@/components/edit-profile-modal";
 import CreatePostModal from "@/components/create-post-modal";
 import VerifiedBadge from "@/components/VerifiedBadge";
 
-
 export default function ProfilePage() {
   const currentUser = useAppStore((state) => state.currentUser);
   const updateUserAvatar = useAppStore((state) => state.updateUserAvatar);
@@ -48,7 +47,7 @@ export default function ProfilePage() {
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [isAvatarPreviewOpen, setIsAvatarPreviewOpen] = useState(false);
   const [copied, setCopied] = useState(false);
- 
+
   const handleShare = () => {
     if (!currentUser?.username) return; // safety check
     const profileUrl = `${window.location.origin}/profile/${currentUser.username}`;
@@ -252,7 +251,7 @@ export default function ProfilePage() {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => console.log("Edit modal open")}
+                onClick={() => setIsEditModalOpen(true)}
                 className="flex-1 py-3 bg-gradient-to-r from-[#00ffff] to-[#0ea5e9] text-[#0d1117] font-semibold rounded-xl hover:opacity-90 transition-smooth glow-primary-sm"
               >
                 Edit Profile
