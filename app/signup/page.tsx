@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAppStore } from "@/lib/store";
+import { useAuth } from "@/lib/auth";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -19,6 +20,7 @@ export default function SignupPage() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const { signup } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
@@ -39,27 +41,30 @@ export default function SignupPage() {
       return;
     }
 
-    // TODO: Add Firebase signup logic here
-    console.log("Signup:", formData);
-
-    // Set user profile and redirect to home
-    useAppStore.setState({
-      currentUser: {
-        id: Math.random().toString(36).substr(2, 9),
-        username: formData.username,
-        displayName: formData.displayName,
-        avatar: "/diverse-profile-avatars.png",
-        bio: "New to Pulse",
-        homies: 0,
-        verified: false,
-        location: "",
-        website: "",
-      },
-      isAuthenticated: true,
-    });
-
-    router.push("/home");
-    setIsLoading(false);
+    try {
+      const res = await signup(formData.email, formData.password);
+      const u = res.user;
+      useAppStore.setState({
+        currentUser: {
+          id: u.uid ?? Math.random().toString(36).substr(2, 9),
+          username: formData.username,
+          displayName:
+            formData.displayName || u.displayName || formData.username,
+          avatar: u.photoURL ?? "/diverse-profile-avatars.png",
+          bio: "New to Pulse",
+          homies: 0,
+          verified: u.emailVerified ?? false,
+          location: "",
+          website: "",
+        },
+        isAuthenticated: true,
+      });
+      router.push("/home");
+    } catch (err: any) {
+      setError(err.message || "Signup failed");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

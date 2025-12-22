@@ -7,9 +7,12 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAppStore } from "@/lib/store";
+import { useAuth } from "@/lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login } = useAuth();
+  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -20,27 +23,29 @@ export default function LoginPage() {
     setIsLoading(true);
     setError("");
 
-    // TODO: Add Firebase login logic here
-    console.log("Login:", { email, password });
-
-    // Set user profile and redirect to home
-    useAppStore.setState({
-      currentUser: {
-        id: Math.random().toString(36).substr(2, 9),
-        username: email.split("@")[0],
-        displayName: email.split("@")[0],
-        avatar: "/diverse-profile-avatars.png",
-        bio: "Pulse user",
-        homies: 0,
-        verified: false,
-        location: "",
-        website: "",
-      },
-      isAuthenticated: true,
-    });
-
-    router.push("/home");
-    setIsLoading(false);
+    try {
+      const res = await login(email, password);
+      const u = res.user;
+      useAppStore.setState({
+        currentUser: {
+          id: u.uid ?? Math.random().toString(36).substr(2, 9),
+          username: u.email?.split("@")[0] ?? email.split("@")[0],
+          displayName: u.displayName ?? u.email?.split("@")[0],
+          avatar: u.photoURL ?? "/diverse-profile-avatars.png",
+          bio: "Pulse user",
+          homies: 0,
+          verified: u.emailVerified ?? false,
+          location: "",
+          website: "",
+        },
+        isAuthenticated: true,
+      });
+      router.push("/home");
+    } catch (err: any) {
+      setError(err.message || "Login failed");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
