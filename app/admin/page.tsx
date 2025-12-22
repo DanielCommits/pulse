@@ -6,6 +6,9 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
+// Force dynamic rendering to prevent build-time auth errors
+export const dynamic = "force-dynamic";
+
 interface User {
   uid: string;
   email: string;
