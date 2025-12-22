@@ -8,7 +8,10 @@ export async function GET(request: NextRequest) {
     }
 
     // Call Cloud Function
-    const functionUrl = `${process.env.NEXT_PUBLIC_FIREBASE_FUNCTIONS_URL || "https://us-central1-YOUR-PROJECT-ID.cloudfunctions.net"}/getUsers`;
+    const functionUrl = `${
+      process.env.NEXT_PUBLIC_FIREBASE_FUNCTIONS_URL ||
+      "https://us-central1-YOUR-PROJECT-ID.cloudfunctions.net"
+    }/getUsers`;
     const response = await fetch(functionUrl, {
       method: "GET",
       headers: {

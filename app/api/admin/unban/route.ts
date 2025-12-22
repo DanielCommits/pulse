@@ -13,7 +13,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Call Cloud Function
-    const functionUrl = `${process.env.NEXT_PUBLIC_FIREBASE_FUNCTIONS_URL || "https://us-central1-YOUR-PROJECT-ID.cloudfunctions.net"}/unbanUser`;
+    const functionUrl = `${
+      process.env.NEXT_PUBLIC_FIREBASE_FUNCTIONS_URL ||
+      "https://us-central1-YOUR-PROJECT-ID.cloudfunctions.net"
+    }/unbanUser`;
     const response = await fetch(functionUrl, {
       method: "POST",
       headers: {

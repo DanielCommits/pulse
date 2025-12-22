@@ -34,82 +34,79 @@ async function verifyAdmin(token: string): Promise<boolean> {
 /**
  * Cloud Function: Get all users
  */
-export const getUsers = onRequest(
-  { cors: true },
-  async (request, response) => {
-    try {
-      const token = request.get("Authorization")?.split(" ")[1];
-      if (!token) {
-        return response.status(401).json({ error: "Unauthorized" });
-      }
-
-      const isAdmin = await verifyAdmin(token);
-      if (!isAdmin) {
-        return response
-          .status(403)
-          .json({ error: "Forbidden - Admin access required" });
-      }
-
-      const result = await auth.listUsers(1000);
-      const users = result.users.map((user) => ({
-        uid: user.uid,
-        email: user.email || "unknown",
-        displayName: user.displayName || null,
-        createdAt: user.metadata.creationTime?.toISOString() || "unknown",
-        lastSignInTime: user.metadata.lastSignInTime?.toISOString() || null,
-        disabled: user.disabled,
-      }));
-
-      return response.json(users);
-    } catch (error) {
-      logger.error("Error fetching users:", error);
-      return response.status(500).json({ error: "Failed to fetch users" });
+export const getUsers = onRequest({ cors: true }, async (request, response) => {
+  try {
+    const token = request.get("Authorization")?.split(" ")[1];
+    if (!token) {
+      return response.status(401).json({ error: "Unauthorized" });
     }
+
+    const isAdmin = await verifyAdmin(token);
+    if (!isAdmin) {
+      return response
+        .status(403)
+        .json({ error: "Forbidden - Admin access required" });
+    }
+
+    const result = await auth.listUsers(1000);
+    const users = result.users.map((user) => ({
+      uid: user.uid,
+      email: user.email || "unknown",
+      displayName: user.displayName || null,
+      createdAt: user.metadata.creationTime?.toISOString() || "unknown",
+      lastSignInTime: user.metadata.lastSignInTime?.toISOString() || null,
+      disabled: user.disabled,
+    }));
+
+    return response.json(users);
+  } catch (error) {
+    logger.error("Error fetching users:", error);
+    return response.status(500).json({ error: "Failed to fetch users" });
   }
-);
+});
 
 /**
  * Cloud Function: Ban user
  */
-export const banUser = onRequest(
-  { cors: true },
-  async (request, response) => {
-    try {
-      const token = request.get("Authorization")?.split(" ")[1];
-      if (!token) {
-        return response.status(401).json({ error: "Unauthorized" });
-      }
+export const banUser = onRequest({ cors: true }, async (request, response) => {
+  try {
+    const token = request.get("Authorization")?.split(" ")[1];
+    if (!token) {
+      return response.status(401).json({ error: "Unauthorized" });
+    }
 
-      const isAdmin = await verifyAdmin(token);
-      if (!isAdmin) {
-        return response
-          .status(403)
-          .json({ error: "Forbidden - Admin access required" });
-      }
+    const isAdmin = await verifyAdmin(token);
+    if (!isAdmin) {
+      return response
+        .status(403)
+        .json({ error: "Forbidden - Admin access required" });
+    }
 
-      const { uid, reason } = request.body;
-      if (!uid) {
-        return response.status(400).json({ error: "UID is required" });
-      }
+    const { uid, reason } = request.body;
+    if (!uid) {
+      return response.status(400).json({ error: "UID is required" });
+    }
 
-      // Disable user
-      await auth.updateUser(uid, { disabled: true });
+    // Disable user
+    await auth.updateUser(uid, { disabled: true });
 
-      // Store ban info
-      await db.collection("bannedUsers").doc(uid).set({
+    // Store ban info
+    await db
+      .collection("bannedUsers")
+      .doc(uid)
+      .set({
         uid,
         reason: reason || "No reason provided",
         bannedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
 
-      logger.info(`User ${uid} banned`);
-      return response.json({ success: true, message: "User banned" });
-    } catch (error) {
-      logger.error("Error banning user:", error);
-      return response.status(500).json({ error: "Failed to ban user" });
-    }
+    logger.info(`User ${uid} banned`);
+    return response.json({ success: true, message: "User banned" });
+  } catch (error) {
+    logger.error("Error banning user:", error);
+    return response.status(500).json({ error: "Failed to ban user" });
   }
-);
+});
 
 /**
  * Cloud Function: Unban user
