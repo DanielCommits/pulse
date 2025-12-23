@@ -26,6 +26,8 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export default function SettingsPage() {
+  const router = useRouter();
+
   const [settings, setSettings] = useState({
     notifications: true,
     darkMode: true,
@@ -76,15 +78,15 @@ export default function SettingsPage() {
       {/* Header */}
       <div className="sticky top-0 z-40 bg-[#0d1117]/80 backdrop-blur-md border-b border-[#30363d]">
         <div className="flex items-center gap-4 p-4">
-          <Link href="/profile">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="p-2 text-[#8b949e] hover:text-[#00ffff] hover:bg-[#1c2128] rounded-lg transition-smooth"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </motion.button>
-          </Link>
+          {/* TWEAK: Changed Link to a button with router.back() */}
+          <motion.button
+            onClick={() => router.back()}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="p-2 text-[#8b949e] hover:text-[#00ffff] hover:bg-[#1c2128] rounded-lg transition-smooth"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </motion.button>
           <h1 className="text-xl font-bold text-[#ffffff]">Settings</h1>
         </div>
       </div>
@@ -199,7 +201,9 @@ function LogoutButton() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Log out</AlertDialogTitle>
-            <AlertDialogDescription>Are you sure you want to log out of your account?</AlertDialogDescription>
+            <AlertDialogDescription>
+              Are you sure you want to log out of your account?
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
