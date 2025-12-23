@@ -1,13 +1,14 @@
 "use client";
 
 import type React from "react";
-
 import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAppStore } from "@/lib/store";
 import { useAuth } from "@/lib/auth";
+import { db } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -18,65 +19,63 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError("");
+ const handleLogin = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setIsLoading(true);
+  setError("");
 
-    try {
-      const res = await login(email, password);
-      const u = res.user;
+  try {
+    // Auth Step
+    const res = await login(email, password);
+    const u = res.user;
+
+    // FIRESTORE STEP: Fetch the profile we created during signup
+    const userSnap = await getDoc(doc(db, "users", u.uid));
+
+    if (userSnap.exists()) {
+      const data = userSnap.data();
+      
+      // Update Store with REAL database data
       useAppStore.setState({
         currentUser: {
-          id: u.uid ?? Math.random().toString(36).substr(2, 9),
-          username: u.email?.split("@")[0] ?? email.split("@")[0],
-          displayName: u.displayName ?? u.email?.split("@")[0],
-          avatar: u.photoURL ?? "/diverse-profile-avatars.png",
-          bio: "Pulse user",
-          homies: 0,
-          verified: u.emailVerified ?? false,
-          location: "",
-          website: "",
+          id: u.uid,
+          username: data.username,
+          displayName: data.displayName,
+          avatar: data.avatar,
+          bio: data.bio,
+          homies: data.homies,
+          verified: data.verified,
+          location: data.location,
+          website: data.website,
         },
         isAuthenticated: true,
       });
       router.push("/home");
-    } catch (err: any) {
-      setError(err.message || "Login failed");
-    } finally {
-      setIsLoading(false);
+    } else {
+      // This happens if Auth succeeds but no Firestore doc exists
+      setError("No profile found for this user.");
     }
-  };
-
+  } catch (err: any) {
+    setError(err.message || "Login failed");
+  } finally {
+    setIsLoading(false);
+  }
+};
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
       {/* Animated background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#0d1117] via-[#161b22] to-[#0d1117]" />
 
-      {/* Animated glow orbs (reduced sizes for desktop fit) */}
+      {/* Animated glow orbs */}
       <motion.div
         className="absolute top-1/6 left-1/6 w-48 h-48 md:w-64 md:h-64 lg:w-80 lg:h-80 bg-[#00ffff] rounded-full opacity-10 blur-3xl"
-        animate={{
-          scale: [1, 1.2, 1],
-          opacity: [0.1, 0.15, 0.1],
-        }}
-        transition={{
-          duration: 8,
-          repeat: Number.POSITIVE_INFINITY,
-          ease: "easeInOut",
-        }}
+        animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.15, 0.1] }}
+        transition={{ duration: 8, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
       />
       <motion.div
         className="absolute bottom-1/6 right-1/6 w-48 h-48 md:w-64 md:h-64 lg:w-80 lg:h-80 bg-[#0ea5e9] rounded-full opacity-10 blur-3xl"
-        animate={{
-          scale: [1.2, 1, 1.2],
-          opacity: [0.15, 0.1, 0.15],
-        }}
-        transition={{
-          duration: 8,
-          repeat: Number.POSITIVE_INFINITY,
-          ease: "easeInOut",
-        }}
+        animate={{ scale: [1.2, 1, 1.2], opacity: [0.15, 0.1, 0.15] }}
+        transition={{ duration: 8, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
       />
 
       <motion.div
@@ -85,7 +84,6 @@ export default function LoginPage() {
         transition={{ duration: 0.5 }}
         className="w-full max-w-md relative z-10"
       >
-        {/* Logo and branding */}
         <div className="text-center mb-8">
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
@@ -93,43 +91,25 @@ export default function LoginPage() {
             transition={{ delay: 0.2, duration: 0.5 }}
             className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-[#00ffff] to-[#0ea5e9] mb-3 glow-primary"
           >
-            <svg
-              className="w-8 h-8 text-[#0d1117]"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 10V3L4 14h7v7l9-11h-7z"
-              />
+            <svg className="w-8 h-8 text-[#0d1117]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
           </motion.div>
           <h1 className="text-3xl font-bold text-[#ffffff] mb-1">Pulse</h1>
           <p className="text-[#8b949e]">Connect, Share, Pulse</p>
         </div>
 
-        {/* Login form */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.5 }}
           className="bg-[#161b22] border border-[#30363d] rounded-xl p-5 backdrop-blur-sm"
         >
-          <h2 className="text-2xl font-semibold text-[#ffffff] mb-6">
-            Welcome back
-          </h2>
+          <h2 className="text-2xl font-semibold text-[#ffffff] mb-6">Welcome back</h2>
 
           <form onSubmit={handleLogin} className="space-y-5">
             <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-[#8b949e] mb-2"
-              >
-                Email
-              </label>
+              <label htmlFor="email" className="block text-sm font-medium text-[#8b949e] mb-2">Email</label>
               <input
                 id="email"
                 type="email"
@@ -142,12 +122,7 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-[#8b949e] mb-2"
-              >
-                Password
-              </label>
+              <label htmlFor="password" className="block text-sm font-medium text-[#8b949e] mb-2">Password</label>
               <input
                 id="password"
                 type="password"
@@ -160,11 +135,7 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="p-3 bg-[#f85149]/10 border border-[#f85149]/20 rounded-lg text-[#f85149] text-sm"
-              >
+              <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="p-3 bg-[#f85149]/10 border border-[#f85149]/20 rounded-lg text-[#f85149] text-sm">
                 {error}
               </motion.div>
             )}
@@ -182,20 +153,9 @@ export default function LoginPage() {
 
           <div className="mt-6 text-center text-sm text-[#8b949e]">
             Don't have an account?{" "}
-            <Link
-              href="/signup"
-              className="text-[#00ffff] hover:text-[#00e5e5] font-medium transition-smooth"
-            >
-              Sign up
-            </Link>
+            <Link href="/signup" className="text-[#00ffff] hover:text-[#00e5e5] font-medium transition-smooth">Sign up</Link>
           </div>
         </motion.div>
-
-        {/* Footer */}
-        <p className="text-center text-xs text-[#6e7681] mt-8">
-          By continuing, you agree to Pulse's Terms of Service and Privacy
-          Policy
-        </p>
       </motion.div>
     </div>
   );

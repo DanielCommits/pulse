@@ -8,6 +8,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAppStore } from "@/lib/store";
 import { useAuth } from "@/lib/auth";
+import { db } from "@/lib/firebase"; 
+import { doc, setDoc } from "firebase/firestore";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -30,42 +32,51 @@ export default function SignupPage() {
   };
 
   const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError("");
+  e.preventDefault();
+  setIsLoading(true);
+  setError("");
 
-    // Validate passwords match
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
-      setIsLoading(false);
-      return;
-    }
+  if (formData.password !== formData.confirmPassword) {
+    setError("Passwords do not match");
+    setIsLoading(false);
+    return;
+  }
 
-    try {
-      const res = await signup(formData.email, formData.password);
-      const u = res.user;
-      useAppStore.setState({
-        currentUser: {
-          id: u.uid ?? Math.random().toString(36).substr(2, 9),
-          username: formData.username,
-          displayName:
-            formData.displayName || u.displayName || formData.username,
-          avatar: u.photoURL ?? "/diverse-profile-avatars.png",
-          bio: "New to Pulse",
-          homies: 0,
-          verified: u.emailVerified ?? false,
-          location: "",
-          website: "",
-        },
-        isAuthenticated: true,
-      });
-      router.push("/home");
-    } catch (err: any) {
-      setError(err.message || "Signup failed");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  try {
+    // Auth Step
+    const res = await signup(formData.email, formData.password);
+    const u = res.user;
+
+    // FIRESTORE STEP: Create the permanent profile
+    const userData = {
+      id: u.uid,
+      username: formData.username.toLowerCase().trim(),
+      displayName: formData.displayName || formData.username,
+      avatar: "/diverse-profile-avatars.png",
+      bio: "New to Pulse",
+      homies: 0,
+      verified: false,
+      location: "",
+      website: "",
+      createdAt: new Date().toISOString(),
+    };
+
+    // Save to the "users" collection using the UID as the document ID
+    await setDoc(doc(db, "users", u.uid), userData);
+
+    // Update Store
+    useAppStore.setState({
+      currentUser: userData,
+      isAuthenticated: true,
+    });
+
+    router.push("/home");
+  } catch (err: any) {
+    setError(err.message || "Signup failed");
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
