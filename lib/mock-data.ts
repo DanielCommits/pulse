@@ -47,7 +47,7 @@ export const mockPosts: Post[] = [
     displayName: "Mike Johnson",
     avatar: "/man-avatar.png",
     content:
-      "I need some money!!",
+      "I need some money!!!",
     timestamp: "4h ago",
     likes: 567,
     comments: 89,
