@@ -3,24 +3,33 @@ import * as admin from "firebase-admin";
 const initializeAdmin = () => {
   if (admin.apps.length > 0) return admin;
 
-  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-  const privateKey = process.env.FIREBASE_PRIVATE_KEY;
-  const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+  // 1. Get the full JSON string from your env
+  const serviceAccountRaw = process.env.FIREBASE_SERVICE_ACCOUNT;
 
-  if (!clientEmail || !privateKey || !projectId) {
-    throw new Error("❌ Firebase Admin missing keys in .env. Check FIREBASE_CLIENT_EMAIL and FIREBASE_PRIVATE_KEY.");
+  if (!serviceAccountRaw) {
+    throw new Error("❌ FIREBASE_SERVICE_ACCOUNT is missing in environment variables.");
   }
 
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId,
-      clientEmail,
-      privateKey: privateKey.replace(/\\n/g, "\n"),
-    }),
-  });
+  try {
+    // 2. Parse the string into a real object
+    const serviceAccount = JSON.parse(serviceAccountRaw);
 
-  console.log("✅ Firebase Admin SDK Initialized Successfully");
-  return admin;
+    // 3. Tweak: The mandatory Vercel newline fix
+    if (serviceAccount.private_key) {
+      serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, "\n");
+    }
+
+    // 4. Initialize using the whole object
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+    });
+
+    console.log("✅ Firebase Admin SDK Initialized Successfully");
+    return admin;
+  } catch (error) {
+    console.error("❌ Failed to parse FIREBASE_SERVICE_ACCOUNT JSON:", error);
+    throw error;
+  }
 };
 
 // Export a single instance
