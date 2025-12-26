@@ -12,6 +12,7 @@ export interface User {
   verified: boolean;
   location: string;
   website: string;
+  createdAt: string;
 }
 
 export interface Post {

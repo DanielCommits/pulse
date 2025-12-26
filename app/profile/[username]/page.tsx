@@ -32,6 +32,7 @@ import PostCard from "@/components/post-card";
 import EditProfileModal from "@/components/edit-profile-modal";
 import CreatePostModal from "@/components/create-post-modal";
 import VerifiedBadge from "@/components/VerifiedBadge";
+import { format } from "date-fns";
 
 export default function ProfilePage() {
   const currentUser = useAppStore((state) => state.currentUser);
@@ -242,7 +243,12 @@ export default function ProfilePage() {
               )}
               <div className="flex items-center gap-1">
                 <Calendar className="w-4 h-4" />
-                <span>Joined March 2024</span>
+                <span>
+                  Joined{" "}
+                  {currentUser?.createdAt
+                    ? format(new Date(currentUser.createdAt), "MMMM yyyy")
+                    : "Recently"}
+                </span>
               </div>
             </div>
 
