@@ -11,6 +11,7 @@ import {
 
 type AuthContextType = {
   user: any | null;
+  loading: boolean; // ✅ ADDED
   login: (email: string, password: string) => Promise<any>;
   signup: (email: string, password: string) => Promise<any>;
   logout: () => Promise<void>;
@@ -22,10 +23,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [user, setUser] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true); // ✅ ADDED
 
   useEffect(() => {
     const unsub = onIdTokenChanged(auth, (u) => {
       setUser(u ?? null);
+      setLoading(false); // ✅ ADDED
     });
     return () => unsub();
   }, []);
@@ -37,7 +40,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const logout = () => signOut(auth);
 
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout }}>
+    <AuthContext.Provider
+      value={{ user, loading, login, signup, logout }} // ✅ ADDED loading
+    >
       {children}
     </AuthContext.Provider>
   );
